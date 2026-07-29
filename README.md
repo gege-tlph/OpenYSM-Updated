@@ -1,7 +1,3 @@
-<div align="center">
-  <img src="images/banner2.png" alt="logo"/>
-</div>
-
 # OpenYSM-Updated — Minecraft 1.21.11 Fabric
 
 > [!IMPORTANT]
