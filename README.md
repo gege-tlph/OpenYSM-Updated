@@ -32,7 +32,12 @@ Fabric API、Architectury API、Cardinal Components API 与 Forge Config API Por
 1. 安装适用于 Minecraft 1.21.11 的 Fabric Loader。
 2. 从 [GitHub Releases](https://github.com/gege-tlph/OpenYSM-Updated/releases/latest) 下载 `openysm-fabric-*.jar`。
 3. 将 JAR 放入客户端和服务端的 `mods` 目录。
-4. 如需女仆模型兼容，同时安装 [东方小女仆 Tsumugi](https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi)。兼容功能会自动启用，无需额外配置。
+4. 如需女仆模型兼容，同时安装 [东方小女仆 Tsumugi](https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi) **0.8.5 或更高版本**。兼容功能会自动启用，无需额外配置。
+
+> [!IMPORTANT]
+> 女仆的挂件渲染（背包、手持物、主副手、头饰、背旗）需要东方小女仆 **0.8.5** 才提供的接口。
+> 若装了更早的版本，本模组会在启动时直接拒绝加载并提示升级——这比进游戏后崩溃要好。
+> 不安装东方小女仆则不受此限制。
 
 ## 模型包兼容
 

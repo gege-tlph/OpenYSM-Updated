@@ -52,7 +52,7 @@ dependencies {
 
     // TLM compat: compile against our maintained Touhou Little Maid: Tsumugi fork
     // (1.21.11 Fabric, jar dropped into libs/ from the TLM repo's remapJar output).
-    modCompileOnly "libs:touhoulittlemaid-fabric:0.8.4-neo1.5.3+mc1.21.11"
+    modCompileOnly "libs:touhoulittlemaid-fabric:0.8.5-neo1.5.3+mc1.21.11"
 
     // Pull common's compile output (named/mojmap) into fabric for both compile and dev-runtime.
     common(project(path: ':common', configuration: 'namedElements')) { transitive = false }

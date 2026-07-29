@@ -31,7 +31,10 @@
     "java": ">=21"
   },
   "suggests": {
-    "another-mod": "*"
+    "touhou_little_maid": ">=0.8.5-neo1.5.3"
+  },
+  "breaks": {
+    "touhou_little_maid": "<0.8.5-neo1.5.3"
   },
   "custom": {
     "cardinal-components": [
