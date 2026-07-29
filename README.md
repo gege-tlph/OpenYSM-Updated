@@ -1,107 +1,77 @@
-# OpenYSM-Updated — Minecraft 1.21.11 Fabric
+# OpenYSM-Updated
 
 > [!IMPORTANT]
-> 本仓库是 [IzumiiKonata/OpenYSM-Updated](https://github.com/IzumiiKonata/OpenYSM-Updated)
-> 的分支，在其 Fabric 高版本移植的基础上补上了**车万女仆（TouhouLittleMaid）兼容层**，
-> 目标平台为 **Minecraft 1.21.11 + Fabric**，独立维护。
-> 本项目不代表 Yes Steve Model 或 OpenYSM 的官方版本。
+> 本仓库是 [IzumiiKonata/OpenYSM-Updated](https://github.com/IzumiiKonata/OpenYSM-Updated) 的非官方维护 fork，面向 Minecraft 1.21.11 与 Fabric，并提供东方小女仆 Tsumugi 兼容。本项目不代表 Yes Steve Model、OpenYSM 或其上游维护者的官方版本。
 
-[OpenYSM](https://github.com/OpenYSM/OpenYSM) 是 Yes Steve Model 的开源实现，
-让玩家使用自定义的 Bedrock / Gecko 模型替换原版玩家模型，并支持动画、材质切换与动画轮盘。
-原版基于 Minecraft 1.20.1 Forge。
+[OpenYSM](https://github.com/OpenYSM/OpenYSM) 是 Yes Steve Model 的开源实现，可使用 Bedrock 或 Gecko 模型替换玩家模型，并支持动画、材质切换与动画轮盘。本 fork 在 Fabric 高版本移植基础上提供 [东方小女仆 Tsumugi](https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi) 的 YSM 模型兼容。
 
-## 关于本分支
+English: An unofficial Fabric 1.21.11 fork of OpenYSM-Updated with Touhou Little Maid: Tsumugi model integration.
 
-上游已经把 OpenYSM 移植到了 1.21.11 Fabric，但其中的车万女仆兼容模块在 Fabric 平台上是**全 stub**
-（`isLoaded()` 恒返回 false、16 个女仆 molang 变量全部返回常量），即装了也不会生效。
-本分支把它做成了真的实现，用作
-[TouhouLittleMaid: Tsumugi](https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi)
-的 YSM 兼容依赖。
+## 功能
 
-兼容层已实现的内容：
+- 为玩家加载和渲染自定义 Bedrock 或 Gecko 模型
+- 支持动画、材质切换、动画轮盘和模型选择界面
+- 为 Tsumugi 女仆提供模型切换、动画、材质和名称显示
+- 支持女仆模型选择界面、动画轮盘与骨骼定位
+- Tsumugi 未安装时自动停用女仆兼容功能
+- 客户端与服务端之间同步模型和动画数据
 
-- 女仆的模型切换与渲染、13 个动画状态、材质切换、名字牌，以及雕像与手办中的动画。
-- 女仆专用的模型选择屏与材质选择屏，并接上开屏事件。
-- 动画轮盘：按键与玩家自己的轮盘分流，仅在准星指向已切换 YSM 模型且属主为本地玩家的女仆时接管。
-- 骨骼定位桥，把 YSM 的骨骼与模型映射到车万女仆的定位契约上。
-- 双向网络包，已在专用服务器与多人环境下验证。
-- 未安装车万女仆时完全隔离：相关类不会被加载，功能自动关闭。
+## 兼容性
 
-## 本分支相对上游修掉的缺陷
+| 组件 | 要求 |
+|---|---|
+| Minecraft | 1.21.11 |
+| Fabric Loader | 0.17.0 或更高版本 |
+| Java | 21 |
+| 安装位置 | 客户端与服务端 |
 
-以下三项都**与车万女仆无关**，是任何使用者都会踩到的上游缺陷：
-
-- **在 GUI 中渲染实体会被压成全黑剪影。** 载具模型接管的判据被放在了副作用之后，
-  导致每个实体都会先被重新提取一遍渲染状态。世界渲染无感，但第三方模组在 GUI
-  中渲染实体时就会全黑。
-- **客户端在 `handleLogin` 崩溃（仅开发环境）。** 玩家能力对象在构造期就读取 SERVER
-  作用域配置，而该对象挂在**每一个**玩家上，包含客户端的本地玩家。服务端未安装本模组时
-  那份配置永远不会送达，开发环境下当场抛出异常。正式环境虽不崩溃，但会静默使用硬编码
-  默认值而非服务端配置值。已改为首次读取时惰性解析。
-- **动画预览界面：载具与床画不出来，且所有动画的位置都不对。** 见下节。
-
-## 已知问题
-
-~~ModelPreviewRenderer 中的动画暂未适配, 会出现问题 (sleep, ride 等动画)~~
-**已修复**。原因是三个互相独立的缺陷：
-
-1. 载具从未被绘制。1.21.11 把 GUI 中的实体渲染改为提交式渲染图模型后，
-   布景回调只能拿到立即模式的参数，移植时方法体就留空了；方块因为其绘制接口
-   仍是立即模式而幸存。
-2. 床从未被绘制。与方块的渲染形状无关——**床的方块模型本身没有任何几何**，
-   只有一张粒子贴图，绘制单个方块的接口对它是空操作。床的几何由方块实体渲染器提供。
-   该缺陷在 1.20.1 原版上同样存在。
-3. 所有动画的位置都不对。GUI 实体渲染器是「先平移再旋转」，而原版是在旋转**之后**
-   才施加动画偏移；把它折进旋转前的平移会被 180° 翻转取反并掺入一个额外分量，
-   取任何数值都不可能等价。
-
-### 仍然开着的
-
-**YSM 模型的女仆不渲染车万女仆的挂件**（背包、手持物、背旗、头顶方块）。
-通道两端都在、中间断开：车万女仆的相关渲染层在移植到 1.21.11 时改用了自家的模型状态，
-定位接口成了零消费者接口。**缺口在车万女仆一侧**，本分支的骨骼定位桥已就绪。
-
-## 版本支持
-
-| 版本      | 支持状态                                        |
-|---------|---------------------------------------------|
-| 1.20.1  | ✅ (原生)                                      |
-| 1.21.1  | ✅ (见 commit history)                        |
-| 1.21.4  | ✅ (见 commit history, 有的类忘了交了可能无法编译，从后面的提交里找 |
-| 1.21.8  | ✅ (见 commit history)                        |
-| 1.21.9  | ✅ (见 commit history)                        |
-| 1.21.10 | ✅ (见 commit history)                        |
-| 1.21.11 | ✅                                           |
-| 26.1.x  | ❌ Architectury 没更新                          |
+Fabric API、Architectury API、Cardinal Components API 与 Forge Config API Port 已包含在发布产物中，无需另行安装。
 
 ## 安装
 
-### 必要前置
+1. 安装适用于 Minecraft 1.21.11 的 Fabric Loader。
+2. 从 [GitHub Releases](https://github.com/gege-tlph/OpenYSM-Updated/releases/latest) 下载 `openysm-fabric-*.jar`。
+3. 将 JAR 放入客户端和服务端的 `mods` 目录。
+4. 如需女仆模型兼容，同时安装 [东方小女仆 Tsumugi](https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi)。兼容功能会自动启用，无需额外配置。
 
-| 组件 | 已验证版本 | 下载 |
-|---|---:|---|
-| Minecraft | 1.21.11 | [Minecraft 官网](https://www.minecraft.net/) |
-| Java | 21 | [Eclipse Temurin 21](https://adoptium.net/temurin/releases/?version=21) |
-| Fabric Loader | 0.19.2 | [Fabric Installer](https://fabricmc.net/use/installer/) |
+## 模型包兼容
 
-Fabric API、Architectury、Cardinal Components 与 Forge Config API Port 已内嵌在发布产物中，
-不需要另行安装。
+为 Tsumugi 女仆提供动画的模型包，需要在 `ysm.json` 中声明女仆动画文件：
 
-本模组请从 [Releases](../../releases) 下载，选择名称中**不含** `sources` 或 `dev-shadow`
-的 `openysm-fabric-*.jar`。客户端与服务器都需要安装。
+```json
+{
+  "tlm": "animations/tlm.animation.json"
+}
+```
 
-### 与车万女仆一起使用
+模型包的其余结构与 OpenYSM 规范保持一致。通用模型制作说明请参考 [OpenYSM Wiki](https://github.com/OpenYSM/OpenYSM/wiki)。
 
-车万女仆兼容层会在检测到 [TouhouLittleMaid: Tsumugi](https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi)
-时自动启用，不需要额外配置。未安装时本模组行为与上游一致。
+## 从源码构建
 
-模型包如果要提供女仆动画，`ysm.json` 中必须声明 `"tlm": "animations/tlm.animation.json"`，
-否则女仆动画会**静默不播**。
+需要 JDK 21。克隆仓库后运行：
 
-## 注意
+```bash
+./gradlew build
+```
 
-### 该项目仅作为高版本移植可行性验证，_**对可用性没有任何保证，使用过程中可能会出现大量bug**_，如果发现问题请提交 issue。
+Windows PowerShell：
 
-## 许可
+```powershell
+.\gradlew.bat build
+```
 
-沿用上游许可，见 [LICENSE.txt](LICENSE.txt)。
+Fabric 构建产物位于 `fabric/build/libs/`。
+
+## 相关项目
+
+| 项目 | 关系 |
+|---|---|
+| [OpenYSM/OpenYSM](https://github.com/OpenYSM/OpenYSM) | OpenYSM 原始项目与通用文档来源 |
+| [IzumiiKonata/OpenYSM-Updated](https://github.com/IzumiiKonata/OpenYSM-Updated) | 本 fork 的直接上游 |
+| [东方小女仆 Tsumugi](https://github.com/gege-tlph/TouhouLittleMaid-Tsumugi) | 女仆模型兼容目标 |
+| [Maid Restaurant](https://github.com/gege-tlph/MaidRestaurant) | Tsumugi 的餐厅自动化附属模组 |
+| [Patchouli](https://github.com/gege-tlph/Patchouli) | 同一维护系列中的游戏内文档库 |
+
+## 许可证
+
+本项目沿用上游的 [MIT License](LICENSE.txt)。
