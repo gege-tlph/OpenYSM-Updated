@@ -9,6 +9,7 @@ import com.elfmcys.yesstevemodel.geckolib3.geo.animated.AnimatedGeoModel;
 import com.elfmcys.yesstevemodel.geckolib3.model.provider.data.EntityModelData;
 import com.elfmcys.yesstevemodel.geckolib3.util.EModelRenderCycle;
 import com.elfmcys.yesstevemodel.geckolib3.util.IRenderCycle;
+import com.github.tartaricacid.touhoulittlemaid.client.renderer.entity.gecko.YsmMaidLayerBridge;
 import com.github.tartaricacid.touhoulittlemaid.client.renderer.entity.state.EntityMaidRenderState;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.geckolib3.geo.GeoLayerRenderer;
@@ -96,7 +97,7 @@ public class MaidGeoRenderer implements IGeoRenderer<MaidAnimatable>, IGeoEntity
         RenderContext.enter(collector, state.camera);
         try {
             setCurrentRTB(bufferSource);
-            renderMaid(animatable, state, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+            renderMaid(animatable, state, entityYaw, partialTick, poseStack, bufferSource, collector, packedLight);
             bufferSource.endBatch();
         } finally {
             RenderContext.exit();
@@ -107,7 +108,8 @@ public class MaidGeoRenderer implements IGeoRenderer<MaidAnimatable>, IGeoEntity
      * 渲染主体，逐项对齐 fork 的 {@code GeoReplacedEntityRenderer.renderEntityWithTexture}。
      */
     private void renderMaid(MaidAnimatable animatable, EntityMaidRenderState state, float entityYaw, float partialTick,
-                            PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+                            PoseStack poseStack, MultiBufferSource bufferSource, SubmitNodeCollector collector,
+                            int packedLight) {
         EntityMaid maid = animatable.getEntity();
         if (maid == null) {
             return;
@@ -200,7 +202,7 @@ public class MaidGeoRenderer implements IGeoRenderer<MaidAnimatable>, IGeoEntity
         renderWithBone(geoModel, animatable, partialTick, poseStack, bufferSource, null, packedLight, overlay,
                 color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, color.getAlpha() / 255.0f);
         if (layersFirst) {
-            renderTlmLayers(state, poseStack, bufferSource, packedLight, event, modelData);
+            renderTlmLayers(animatable, state, poseStack, collector);
         }
         if (renderType != null) {
             renderWithBoneAndRenderType(geoModel, animatable, partialTick, renderType, poseStack, bufferSource,
@@ -208,7 +210,7 @@ public class MaidGeoRenderer implements IGeoRenderer<MaidAnimatable>, IGeoEntity
                     color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, color.getAlpha() / 255.0f);
         }
         if (!layersFirst) {
-            renderTlmLayers(state, poseStack, bufferSource, packedLight, event, modelData);
+            renderTlmLayers(animatable, state, poseStack, collector);
         }
         poseStack.popPose();
     }
@@ -217,25 +219,21 @@ public class MaidGeoRenderer implements IGeoRenderer<MaidAnimatable>, IGeoEntity
      * TLM 交接过来的 Geo layer（手持物 / 头顶方块 / 背包 / 背部物品 / 背旗，共 5 个，
      * 由 TLM 的 {@code GeckoEntityMaidRenderer} 构造时 addLayer）。
      * <p>
-     * <b>本方法有意不调用它们，原因不是省事：它们在 YSM 路径上无法运行。</b>
-     * 这些 layer 的签名要 {@code GeckoMaidRenderData}，而内部走
-     * {@code data.modelState.visitLocatorGroup(GeoLocatorType.BACKPACK, …)}——依赖的是
-     * <b>TLM 自己那套 gecko 模型状态</b>。女仆切到 YSM 模型后，渲染的是 YSM 的模型，
-     * TLM 的 modelState 根本不存在，传 null 会直接 NPE（2026-07-28 实测崩在
-     * GeckoLayerMaidBackpack:24），造一个假的更是无从下手。
+     * <b>调用时机是硬要求</b>：必须在本类的 {@code pushPose()}/{@code popPose()} 之内、根变换
+     * （睡姿位移、{@code setupRotations}、{@code preRenderCallback}、那个 0.01 抬升）都施加完之后。
+     * 挂件靠骨骼链定位，而骨骼链是相对模型根的；挪到 {@code geoRender} 外面调，挂件会整体错位。
      * <p>
-     * 基准（Forge 1.20.1）能做这件事，是因为它 {@code layerRenderer.copy(ysmRenderer)} 把 layer
-     * 重绑到 YSM 渲染器，且当年的 layer 走 TLM 的 {@code IGeoEntity#getGeoModel()} →
-     * {@code ILocationModel} 定位组接口（正是我们骨骼桥实现的那个）。
-     * <b>TLM 移植到 1.21.11 时把 layer 改成用自己的 modelState，`ILocationModel` 在 TLM 里
-     * 已成零消费者接口</b>——通道还在，两端却接不上了。
+     * 怎么构造 render data、定位来源塞什么、camera 从哪来，全在 TLM 的 {@code YsmMaidLayerBridge}
+     * 里，本处只负责「在正确的坐标系里调一次」。TLM 日后增删 layer 不必惊动这边。
      * <p>
-     * ⇒ 后果：YSM 模型女仆暂时不渲染 TLM 挂件（背包 / 手持物 / 背旗 / 头顶方块）。
-     * 这是 TLM 侧的移植漂移，修在 TLM（让 layer 能消费 ILocationModel 定位组），不在此处兜底。
+     * <b>历史</b>：TLM 移植到 1.21.11 时把这些 layer 改成直接持有自家 gecko 的 {@code GeoModelState}，
+     * {@code ILocationModel} 随之成为零消费者接口，本方法因此曾是空实现——通道两端俱在、中间断开，
+     * YSM 模型女仆整整一个版本不渲染任何挂件。TLM 侧已补上定位来源抽象，这里遂能接回去。
      */
-    private void renderTlmLayers(EntityMaidRenderState state, PoseStack poseStack, MultiBufferSource bufferSource,
-                                 int packedLight, AnimationEvent<?> event, EntityModelData modelData) {
-        // 见方法注释：TLM 的 gecko layer 需要 TLM 自己的 modelState，YSM 路径上不存在。
+    private void renderTlmLayers(MaidAnimatable animatable, EntityMaidRenderState state, PoseStack poseStack,
+                                 SubmitNodeCollector collector) {
+        YsmMaidLayerBridge.submitMaidLayers(this.tlmLayerRenderers, collector, poseStack, state,
+                animatable.getGeoModel());
     }
 
     /**
