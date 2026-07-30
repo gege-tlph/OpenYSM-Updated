@@ -35,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidAnimatable;
 import rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidRenderStore;
+import rip.ysm.compat.touhoulittlemaid.fabric.tlm.anim.MaidPoseOffset;
 
 import java.util.List;
 
@@ -179,6 +180,16 @@ public class MaidGeoRenderer implements IGeoRenderer<MaidAnimatable>, IGeoEntity
             if (bedOrientation != null) {
                 float eyeHeight = vanillaMaid.getEyeHeight(Pose.STANDING) - 0.1f;
                 poseStack.translate(-bedOrientation.getStepX() * eyeHeight, 0.0f, -bedOrientation.getStepZ() * eyeHeight);
+            }
+        }
+
+        // 坐姿动画的垂直修正。**必须在 setupRotations 之前**：这里还是未旋转的世界轴，
+        // 一个纯 Y 平移语义无歧义；挪到之后就会被 isUpsideDown 那条 Z-180 取反。
+        // 预览态不施加——预览有它自己的一套 poseYOffset（见 ModelPreviewRenderer），叠加就是双份。
+        if (!syncRotationsForPreview) {
+            float poseYOffset = MaidPoseOffset.resolve(maid, animatable);
+            if (poseYOffset != 0.0f) {
+                poseStack.translate(0.0f, poseYOffset, 0.0f);
             }
         }
 

@@ -16,6 +16,14 @@ import java.util.function.BiPredicate;
 /**
  * 女仆主动画状态表，移植自 OpenYSM 原版 {@code MaidAnimation}。
  * 13 个状态与优先级逐字对齐基准；顺序即注册顺序，同优先级桶内先注册者先命中。
+ * <p>
+ * <b>这张表在女仆骑乘时整个不生效</b>：{@link MaidAnimationPredicate} 在有活载具时无条件
+ * 返回 STOP，压根不碰优先级桶。所以 {@code jump} 那条 {@code !onGround()} 判据虽然对乘客
+ * 恒真，也轮不到它——骑乘动画归 {@code player.vehicle} 控制器的
+ * {@code LivingMovementAnimationPredicate} 管。
+ * <p>
+ * ⚠️ {@link MaidPoseOffset} 镜像了「{@code sit} 何时真的被选中」，即 {@code sit} 与排在它
+ * 前面的六个 HIGHEST 状态。<b>改这里的优先级或判据，那边要同步。</b>
  */
 @Environment(EnvType.CLIENT)
 public final class MaidAnimationStates {
