@@ -13,6 +13,7 @@ English: An unofficial Fabric 1.21.11 fork of OpenYSM-Updated with Touhou Little
 - 支持动画、材质切换、动画轮盘和模型选择界面
 - 为 Tsumugi 女仆提供模型切换、动画、材质和名称显示
 - 支持女仆模型选择界面、动画轮盘与骨骼定位
+- 女仆坐下待命、骑马、坐船时稳稳落在座位上，不会浮在座位上方
 - Tsumugi 未安装时自动停用女仆兼容功能
 - 客户端与服务端之间同步模型和动画数据
 
