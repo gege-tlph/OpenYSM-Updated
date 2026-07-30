@@ -53,6 +53,9 @@ dependencies {
     // TLM compat: compile against our maintained Touhou Little Maid: Tsumugi fork
     // (1.21.11 Fabric, jar dropped into libs/ from the TLM repo's remapJar output).
     modCompileOnly "libs:touhoulittlemaid-fabric:0.8.5-neo1.5.3+mc1.21.11"
+    // 开发运行时也要装上它，否则 runClient 里根本没有女仆，本 fork 的 TLM 集成整条无法自测。
+    // modLocalRuntime 只作用于开发环境：不进 remapJar，不进 fabric.mod.json 的 depends。
+    modLocalRuntime "libs:touhoulittlemaid-fabric:0.8.5-neo1.5.3+mc1.21.11"
 
     // Pull common's compile output (named/mojmap) into fabric for both compile and dev-runtime.
     common(project(path: ':common', configuration: 'namedElements')) { transitive = false }

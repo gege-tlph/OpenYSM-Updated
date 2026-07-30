@@ -106,3 +106,5 @@ gradle-app.setting
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
 
+# Architectury transformer 的构建产物
+.architectury-transformer/
