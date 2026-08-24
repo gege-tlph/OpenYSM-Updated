@@ -4,6 +4,7 @@ import com.elfmcys.yesstevemodel.YesSteveModel;
 import com.elfmcys.yesstevemodel.capability.PlayerCapability;
 import com.elfmcys.yesstevemodel.client.model.ModelAssembly;
 import com.elfmcys.yesstevemodel.config.GeneralConfig;
+import com.elfmcys.yesstevemodel.network.NetworkHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class PauseScreenButtonBuilder {
     public static boolean isServerConnected() {
-        return YesSteveModel.isOnAndroid();
+        return YesSteveModel.isAvailable() && NetworkHandler.isClientConnected();
     }
 
     @Nullable
