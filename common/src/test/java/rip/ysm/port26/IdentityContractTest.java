@@ -29,6 +29,23 @@ class IdentityContractTest {
         assertFalse(Files.exists(repoFile("common/src/main/resources/assets/sparkle_morpher")));
     }
 
+    @Test
+    void classicGuiFilesRemainInOpenYsmTree() {
+        String guiRoot = "common/src/main/java/com/elfmcys/yesstevemodel/client/gui/";
+        for (String file : List.of(
+                "PlayerModelScreen.java",
+                "PlayerTextureScreen.java",
+                "ModelInfoScreen.java",
+                "AnimationRouletteScreen.java",
+                "ModelUploadScreen.java",
+                "DownloadScreen.java",
+                "OpenModelFolderScreen.java",
+                "ExtraPlayerConfigScreen.java",
+                "PauseScreenButtonBuilder.java")) {
+            assertTrue(Files.isRegularFile(repoFile(guiRoot + file)), "missing classic GUI file: " + file);
+        }
+    }
+
     private static String readRepoFile(String relative) throws Exception {
         return Files.readString(repoFile(relative), StandardCharsets.UTF_8);
     }
