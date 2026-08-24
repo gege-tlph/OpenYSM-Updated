@@ -52,10 +52,21 @@ public class ReplacePlayerRenderEvent {
                                 ? 15728880
                                 : renderState.lightCoords;
                         RendererManager.getPlayerRenderer().render(entity, renderState, entity.getYRot(), ModelPreviewRenderer.isPreview() ? 1.0f : partialTick, poseStack, bufferSource, packedLight);
-                        if (OculusCompat.isRenderingShadowPass()) {
+                    } finally {
+                        // Player replacement is invoked from the 26.1 submit path, while
+                        // the legacy Geo renderer still writes immediate vertices into the
+                        // shared BufferSource. Flush that batch before the collector resumes;
+                        // otherwise the replacement is state-correct but never reaches the
+                        // world framebuffer (and vanilla remains visible to OTHER clients,
+                        // which have no reason to flush this local player's buffer for us).
+                        // Skip only the Oculus shadow pass: unconditional flush there caused
+                        // shadow-map culling to intermittently drop player geometry (fixed
+                        // 2026-05-15, 62c4257) — that fix's condition was written inverted
+                        // (guarded the shadow pass instead of skipping it), which silently
+                        // disabled the normal-pass flush this fork actually needed.
+                        if (!OculusCompat.isRenderingShadowPass()) {
                             bufferSource.endBatch();
                         }
-                    } finally {
                         RenderContext.exit();
                     }
                 }

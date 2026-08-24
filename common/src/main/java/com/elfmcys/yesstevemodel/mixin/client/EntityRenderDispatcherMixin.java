@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.Projectile;
+import rip.ysm.compat.oculus.OculusCompat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -95,6 +96,15 @@ public abstract class EntityRenderDispatcherMixin implements IEntityRenderDispat
             }
             return true;
         } finally {
+            // Same shared-BufferSource flush gap as ReplacePlayerRenderEvent (see there for
+            // the full explanation): vehicles/projectiles/fishing hooks are drawn immediately
+            // into the singleton bufferSource during this submit-phase callback, so it must be
+            // flushed here or the geometry never reaches the framebuffer for remote viewers.
+            // Skip only the Oculus shadow pass to avoid the shadow-map culling flicker that an
+            // unconditional flush caused there.
+            if (!OculusCompat.isRenderingShadowPass()) {
+                bufferSource.endBatch();
+            }
             RenderContext.exit();
         }
     }
