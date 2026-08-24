@@ -38,8 +38,8 @@ public final class YSMChannelImpl {
     public static void init(Identifier id, String version) {
         channelId = id;
         YSMPayload.init(id);
-        PayloadTypeRegistry.playC2S().register(YSMPayload.TYPE, YSMPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(YSMPayload.TYPE, YSMPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(YSMPayload.TYPE, YSMPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(YSMPayload.TYPE, YSMPayload.CODEC);
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> currentServer = server);
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> currentServer = null);
@@ -74,11 +74,11 @@ public final class YSMChannelImpl {
         if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
             return;
         }
-        YSMChannelClientImpl.sendToServer(encodePayload(packet));
+        YSMChannelClientImpl.sendToServer(encode(packet));
     }
 
     public static void sendToClientPlayer(Object packet, ServerPlayer player) {
-        ServerPlayNetworking.send(player, encodePayload(packet));
+        ServerPlayNetworking.send(player, YSMPayload.fromBuf(encode(packet)));
     }
 
     public static void sendToAll(Object packet) {
@@ -86,21 +86,21 @@ public final class YSMChannelImpl {
         if (server == null) {
             return;
         }
-        YSMPayload payload = encodePayload(packet);
+        YSMPayload payload = YSMPayload.fromBuf(encode(packet));
         for (ServerPlayer player : PlayerLookup.all(server)) {
             ServerPlayNetworking.send(player, payload);
         }
     }
 
     public static void sendToTrackingEntity(Object packet, Entity entity) {
-        YSMPayload payload = encodePayload(packet);
+        YSMPayload payload = YSMPayload.fromBuf(encode(packet));
         for (ServerPlayer player : PlayerLookup.tracking(entity)) {
             ServerPlayNetworking.send(player, payload);
         }
     }
 
     public static void sendToTrackingEntityAndSelf(Object packet, Player player) {
-        YSMPayload payload = encodePayload(packet);
+        YSMPayload payload = YSMPayload.fromBuf(encode(packet));
         for (ServerPlayer p : PlayerLookup.tracking(player)) {
             ServerPlayNetworking.send(p, payload);
         }
@@ -110,17 +110,17 @@ public final class YSMChannelImpl {
     }
 
     public static Packet<?> toClientboundPacket(Object packet) {
-        return ServerPlayNetworking.createS2CPacket(encodePayload(packet));
+        return new net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket(YSMPayload.fromBuf(encode(packet)));
     }
 
     public static Packet<?> toServerboundPacket(Object packet) {
         if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
             throw new IllegalStateException("toServerboundPacket can only be invoked from the client environment");
         }
-        return YSMChannelClientImpl.toServerboundPacket(encodePayload(packet));
+        return YSMChannelClientImpl.toServerboundPacket(encode(packet));
     }
 
-    private static YSMPayload encodePayload(Object packet) {
+    static FriendlyByteBuf encode(Object packet) {
         Integer id = ID_BY_CLASS.get(packet.getClass());
         if (id == null) {
             throw new IllegalStateException("Packet type not registered: " + packet.getClass());
@@ -128,8 +128,6 @@ public final class YSMChannelImpl {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeByte(id & 0xff);
         CODECS_BY_ID.get(id).encode(packet, buf);
-        byte[] arr = new byte[buf.readableBytes()];
-        buf.readBytes(arr);
-        return new YSMPayload(arr);
+        return buf;
     }
 }

@@ -16,11 +16,11 @@ public final class YSMChannelClientImpl {
                 YSMChannelImpl.dispatch(payload.toBuf(), new ClientPacketContext(context.client(), context.player().connection.getConnection())));
     }
 
-    public static void sendToServer(YSMPayload payload) {
-        ClientPlayNetworking.send(payload);
+    public static void sendToServer(net.minecraft.network.FriendlyByteBuf buf) {
+        ClientPlayNetworking.send(YSMPayload.fromBuf(buf));
     }
 
-    public static Packet<?> toServerboundPacket(YSMPayload payload) {
-        return ClientPlayNetworking.createC2SPacket(payload);
+    public static Packet<?> toServerboundPacket(net.minecraft.network.FriendlyByteBuf buf) {
+        return new net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket(YSMPayload.fromBuf(buf));
     }
 }
