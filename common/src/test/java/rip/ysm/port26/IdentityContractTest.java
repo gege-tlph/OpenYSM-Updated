@@ -46,6 +46,17 @@ class IdentityContractTest {
         }
     }
 
+    @Test
+    void classicGuiHasKeyboardAndPauseEntrypoints() throws Exception {
+        String toggle = readRepoFile("common/src/main/java/com/elfmcys/yesstevemodel/client/input/PlayerModelToggleKey.java");
+        assertTrue(toggle.contains("InputConstants.Type.KEYSYM, 89"));
+        assertTrue(toggle.contains("new PlayerModelScreen()"));
+
+        String pause = readRepoFile("common/src/main/java/com/elfmcys/yesstevemodel/client/gui/PauseScreenButtonBuilder.java");
+        assertTrue(pause.contains("new PlayerModelScreen()"));
+        assertTrue(pause.contains("new AnimationRouletteScreen"));
+    }
+
     private static String readRepoFile(String relative) throws Exception {
         return Files.readString(repoFile(relative), StandardCharsets.UTF_8);
     }
