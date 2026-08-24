@@ -1,6 +1,11 @@
 plugins {
-    id 'fabric-loom' version '1.17.0-alpha.8' apply false
+    id 'dev.architectury.loom' version '1.17.487' apply false
+    id 'architectury-plugin' version '3.5-SNAPSHOT'
     id 'com.gradleup.shadow' version '9.2.2' apply false
+}
+
+architectury {
+    minecraft = project.minecraft_version
 }
 
 allprojects {
@@ -9,7 +14,8 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'fabric-loom'
+    apply plugin: 'dev.architectury.loom'
+    apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
 
     base {
