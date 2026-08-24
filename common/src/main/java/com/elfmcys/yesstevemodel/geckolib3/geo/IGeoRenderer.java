@@ -58,7 +58,7 @@ public interface IGeoRenderer<T extends AnimatableEntity<?>> {
             if (z3) {
                 return CustomEntityTranslucentRenderType.get(identifier);
             }
-            return RenderTypes.entityCutoutNoCull(identifier);
+            return RenderTypes.entityCutout(identifier);
         }
         if (z2) {
             return RenderTypes.outline(identifier);

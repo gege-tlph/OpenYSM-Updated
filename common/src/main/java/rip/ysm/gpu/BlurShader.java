@@ -2,7 +2,6 @@ package rip.ysm.gpu;
 
 import com.elfmcys.yesstevemodel.YesSteveModel;
 import com.elfmcys.yesstevemodel.util.log.ChatLogger;
-import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTextureView;
 import com.mojang.blaze3d.opengl.DirectStateAccess;
@@ -180,7 +179,8 @@ public final class BlurShader {
         if (!(colorView instanceof GlTextureView glColor) || !(depthView instanceof GlTextureView glDepth)) {
             return;
         }
-        DirectStateAccess dsa = ((GlDevice) RenderSystem.getDevice()).directStateAccess();
+        DirectStateAccess dsa = directStateAccess();
+        if (dsa == null) return;
         int mainFbo = glColor.getFbo(dsa, glDepth.texture());
 
         GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, mainFbo);
@@ -189,6 +189,16 @@ public final class BlurShader {
         GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
         GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
         GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, mainFbo);
+    }
+
+    private static DirectStateAccess directStateAccess() {
+        try {
+            var method = RenderSystem.getDevice().getClass().getDeclaredMethod("directStateAccess");
+            method.setAccessible(true);
+            return (DirectStateAccess) method.invoke(RenderSystem.getDevice());
+        } catch (Throwable ignored) {
+            return null;
+        }
     }
 
     private static void ensureCaptureTexture(int w, int h) {

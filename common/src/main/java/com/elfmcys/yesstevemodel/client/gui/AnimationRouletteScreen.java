@@ -700,7 +700,7 @@ public class AnimationRouletteScreen extends Screen {
         float innerEndY = this.centerY + innerRadius * endSin;
         float outerEndX = this.centerX + outerRadius * endCos;
         float outerEndY = this.centerY + outerRadius * endSin;
-        guiGraphics.guiRenderState.submitGuiElement(RadialSliceRenderState.of(
+        guiGraphics.guiRenderState.addGuiElement(RadialSliceRenderState.of(
                 guiGraphics.pose(),
                 outerStartX, outerStartY,
                 innerStartX, innerStartY,

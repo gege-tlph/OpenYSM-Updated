@@ -143,7 +143,7 @@ public class ClientModelManager {
                 ClientModelInfo parsedBundle = YSMClientMapper.buildParsedBundle(rawModel, "default");
 
 
-                onModelDataReceived(parsedBundle, "default", true);
+                onModelDataReceived(parsedBundle, "default", true, true);
                 YesSteveModel.LOGGER.info("[YSM] Successfully pushed Default Model to render queue.");
             } catch (Exception e) {
                 YesSteveModel.LOGGER.error("[YSM] Failed to dispatch Default Model", e);
@@ -383,7 +383,7 @@ public class ClientModelManager {
                 outBuf.writeVarLong(h.hash2);
             }
 
-            YsmCrypt.EncryptedPacket result = YsmCrypt.encrypt(outBuf.toArray(), key1);
+            YsmCrypt.EncryptedPacket result = YsmCrypt.encrypt(outBuf.toArray(), key1, true);
             sendModelFile(ByteBuffer.wrap(result.data()));
         }
 
@@ -769,7 +769,7 @@ public class ClientModelManager {
     private static void onModelDataReceived(@Nullable ClientModelInfo parsedBundle, String modelId, boolean isPrimary, boolean isAuth) throws Exception {
         if (isPrimary) {
             pendingModelCallback = () -> {
-                processModelData(parsedBundle, modelId, true);
+                processModelData(parsedBundle, modelId, true, true);
             };
         } else {
             runPendingModelCallback();

@@ -5,7 +5,6 @@ import com.elfmcys.yesstevemodel.mixin.client.GlBufferAccessor;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.opengl.DirectStateAccess;
 import com.mojang.blaze3d.opengl.GlBuffer;
-import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlSampler;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTexture;
@@ -98,7 +97,8 @@ public final class GpuRenderPath {
         }
         if (!(targetColorView instanceof GlTextureView glTargetColorView)) return false;
         if (!(targetDepthView instanceof GlTextureView glTargetDepthView)) return false;
-        DirectStateAccess dsa = ((GlDevice) RenderSystem.getDevice()).directStateAccess();
+        DirectStateAccess dsa = directStateAccess();
+        if (dsa == null) return false;
         int targetFbo = glTargetColorView.getFbo(dsa, glTargetDepthView.texture());
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, targetFbo);
         GlStateManager._viewport(0, 0, targetWidth, targetHeight);
@@ -114,7 +114,7 @@ public final class GpuRenderPath {
         if (!(modelGpuTex instanceof GlTexture glModelTex)) return false;
         int modelTexId = glModelTex.glId();
 
-        GpuTextureView lightView = mc.gameRenderer.lightTexture().getTextureView();
+        GpuTextureView lightView = mc.gameRenderer.lightmap();
         if (!(lightView instanceof GlTextureView glLightView)) return false;
         int lightTexId = glLightView.texture().glId();
 
@@ -197,6 +197,16 @@ public final class GpuRenderPath {
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, savedFbo);
 
         return true;
+    }
+
+    private static DirectStateAccess directStateAccess() {
+        try {
+            var method = RenderSystem.getDevice().getClass().getDeclaredMethod("directStateAccess");
+            method.setAccessible(true);
+            return (DirectStateAccess) method.invoke(RenderSystem.getDevice());
+        } catch (Throwable ignored) {
+            return null;
+        }
     }
 
     public static void disposeMesh(GeoModel model) {

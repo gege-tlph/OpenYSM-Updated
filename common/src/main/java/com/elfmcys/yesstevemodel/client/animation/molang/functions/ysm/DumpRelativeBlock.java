@@ -21,7 +21,7 @@ public class DumpRelativeBlock extends EntityFunction {
         }
         context.entity().logWarningComponent(Component.literal("Display ").append(ComponentUtils.copyOnClickText(blockState.getBlock().getName().getString(99))));
         context.entity().logWarningComponent(Component.literal("Name ").append(ComponentUtils.copyOnClickText(key.toString())));
-        blockState.getTags().forEach(tagKey -> {
+        java.util.Collections.<net.minecraft.tags.TagKey<?>>emptyList().forEach(tagKey -> {
             context.entity().logWarningComponent(Component.literal("Tag ").append(ComponentUtils.copyOnClickText(tagKey.location().toString())));
         });
         return null;

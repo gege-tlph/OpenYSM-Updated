@@ -10,7 +10,6 @@ import com.elfmcys.yesstevemodel.util.log.ChatLogger;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.resources.Identifier;
 import org.joml.*;
 import rip.ysm.compat.oculus.OculusCompat;
@@ -34,7 +33,7 @@ public class NativeModelRenderer {
     public static void renderMesh(VertexConsumer buffer, PoseStack.Pose pose, GeoModel model, float[] boneParams, float[] stateBuffer, int textureIndex, int renderPartMask, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, Identifier textureLocation) {
         OculusCompat.updatePBRState();
         boolean isCompatMode = OptiFineDetector.isOptifinePresent() || GeneralConfig.USE_COMPATIBILITY_RENDERER.get();
-        projectionModelViewMatrix.set(net.minecraft.client.Minecraft.getInstance().gameRenderer.getProjectionMatrix(net.minecraft.client.Minecraft.getInstance().options.fov().get())).mul(RenderSystem.getModelViewMatrix());
+        projectionModelViewMatrix.set(RenderSystem.getModelViewMatrix());
         boolean isPreview = ModelPreviewRenderer.isPreview() || ModelPreviewRenderer.isExtraPlayer();
 
         if (textureLocation != null && NativeLibLoader.isLoaded() && !GeneralConfig.USE_COMPATIBILITY_RENDERER.get() && GeneralConfig.USE_GPU_RENDERER.get()) {
@@ -110,7 +109,7 @@ public class NativeModelRenderer {
         // TODO: 修復GC壓力
         Matrix4f rootPoseMat = pose.pose();
         Matrix3f rootNormalMC = pose.normal();
-        Matrix4f projMat = net.minecraft.client.Minecraft.getInstance().gameRenderer.getProjectionMatrix(net.minecraft.client.Minecraft.getInstance().options.fov().get());
+        Matrix4f projMat = new Matrix4f();
 
         Matrix4f identityMat = new Matrix4f();
         Matrix4f globalBoneMat = new Matrix4f();

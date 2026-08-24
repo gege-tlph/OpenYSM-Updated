@@ -59,7 +59,7 @@ public class Ride extends LivingEntityFunction {
             return strSubstring.equals(key.toString()) ? 1 : 0;
         }
         if (id.startsWith(PREFIX_ITEM_TAG)) {
-            return entityType.is(TagKey.create(Registries.ENTITY_TYPE, Identifier.parse(strSubstring))) ? 1 : 0;
+            return entityType.builtInRegistryHolder().is(TagKey.create(Registries.ENTITY_TYPE, Identifier.parse(strSubstring))) ? 1 : 0;
         }
         return 0;
     }

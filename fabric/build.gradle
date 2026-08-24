@@ -54,6 +54,9 @@ dependencies {
     // Optional shader integration is pinned to the 26.1 line; it is compile-only.
     modCompileOnly "maven.modrinth:iris:1.10.9+26.1-fabric"
 
+    testImplementation "org.junit.jupiter:junit-jupiter:5.12.1"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
     // TLM is intentionally absent from the first 26.1.2 playable node. The
     // compat package remains source-compatible but does not gate this build.
 
@@ -78,4 +81,16 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
+}
+
+// The 26.1.2 layered mapping is intentionally a compile/runtime bridge and
+// does not provide a complete intermediary namespace for Loom source remapping.
+// Keep the regular sources JAR; the playable remapped mod JAR remains enabled.
+tasks.named('remapSourcesJar') {
+    enabled = false
+}
+
+test {
+    useJUnitPlatform()
+    failOnNoDiscoveredTests = false
 }

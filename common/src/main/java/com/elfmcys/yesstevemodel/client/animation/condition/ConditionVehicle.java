@@ -65,6 +65,6 @@ public class ConditionVehicle {
         if (this.tagTest.isEmpty()) {
             return EMPTY;
         }
-        return this.tagTest.stream().filter(tagKey -> entity.getType().is(tagKey)).findFirst().map(tagKey2 -> this.tagPre + tagKey2.location()).orElse(EMPTY);
+        return this.tagTest.stream().filter(tagKey -> entity.getType().builtInRegistryHolder().is(tagKey)).findFirst().map(tagKey2 -> this.tagPre + tagKey2.location()).orElse(EMPTY);
     }
 }

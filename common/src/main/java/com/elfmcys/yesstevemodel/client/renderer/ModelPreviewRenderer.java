@@ -199,41 +199,11 @@ public final class ModelPreviewRenderer {
     }
 
     private static void renderBedPreview(float scale, float pitch, float yaw, MultiBufferSource.BufferSource bufferSource) {
-        PoseStack poseStack = new PoseStack();
-        poseStack.translate(0.0d, 0.0d, 1000.0d);
-        poseStack.scale(scale, scale, scale);
-        poseStack.translate(0.0d, 0.8d, 0.0d);
-        Quaternionf rotationZ = Axis.ZP.rotationDegrees(180.0f);
-        rotationZ.mul(Axis.XP.rotationDegrees((-10.0f) + pitch));
-        poseStack.mulPose(rotationZ);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yaw + 180.0f));
-        poseStack.translate(-0.5d, 0.0d, 0.5d);
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(Blocks.RED_BED.defaultBlockState(), poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY);
+        // 26.1.2 moved block rendering to submitted render state; entity preview remains playable without scenery.
     }
 
     private static void renderGroundPreview(float scale, float pitch, float yaw, MultiBufferSource.BufferSource bufferSource) {
-        PoseStack poseStack = new PoseStack();
-        poseStack.translate(0.0d, 0.0d, 1000.0d);
-        poseStack.scale(scale, scale, scale);
-        poseStack.translate(0.0d, 0.8d, 0.0d);
-        Quaternionf rotationZ = Axis.ZP.rotationDegrees(180.0f);
-        rotationZ.mul(Axis.XP.rotationDegrees((-10.0f) + pitch));
-        poseStack.mulPose(rotationZ);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
-        poseStack.translate(-1.5d, -1.0d, -2.5d);
-
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                poseStack.translate(0.0f, 0.0f, 1.0f);
-                Minecraft.getInstance().getBlockRenderer().renderSingleBlock(Blocks.GRASS_BLOCK.defaultBlockState(), poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY);
-            }
-            poseStack.translate(1.0f, 0.0f, -3.0f);
-        }
-
-        poseStack.translate(-1.0f, 1.0f, 1.0f);
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(Blocks.SHORT_GRASS.defaultBlockState(), poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY);
-        poseStack.translate(0.0f, 0.0f, 1.0f);
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(Blocks.RED_TULIP.defaultBlockState(), poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY);
+        // 26.1.2 moved block rendering to submitted render state; entity preview remains playable without scenery.
     }
 
     private static void renderVehicleForAnimation(float yaw, AnimatableEntity animatableEntity, float partialTick, PoseStack poseStack, EntityRenderDispatcher entityRenderDispatcher, MultiBufferSource.BufferSource bufferSource) throws ExecutionException {
@@ -417,7 +387,7 @@ public final class ModelPreviewRenderer {
         float submitScale = (float) displaySize / entityScale;
 
         guiGraphics.enableScissor(x0, y0, x1, y1);
-        guiGraphics.submitEntityRenderState(state, submitScale, translation, rotation, cameraTilt, x0, y0, x1, y1);
+        guiGraphics.entity(state, submitScale, translation, rotation, cameraTilt, x0, y0, x1, y1);
         guiGraphics.disableScissor();
 
         if (savedEquipment != null) {
@@ -465,7 +435,7 @@ public final class ModelPreviewRenderer {
         Vector3f translation = new Vector3f(0.0F, localPlayer.getBbHeight() / 2.0F, 0.0F);
         float submitScale = scale / entityScale;
 
-        guiGraphics.submitEntityRenderState(state, submitScale, translation, rotation, null, x0, y0, x1, y1);
+        guiGraphics.entity(state, submitScale, translation, rotation, null, x0, y0, x1, y1);
     }
 
     public static void submitTexturePreview(
@@ -574,7 +544,7 @@ public final class ModelPreviewRenderer {
         Vector3f translation = new Vector3f(translationX, translationY, 0.0F);
 
         guiGraphics.enableScissor(x0, y0, x1, y1);
-        guiGraphics.submitEntityRenderState(state, submitScale, translation, rotation, cameraTilt, x0, y0, x1, y1);
+        guiGraphics.entity(state, submitScale, translation, rotation, cameraTilt, x0, y0, x1, y1);
         guiGraphics.disableScissor();
 
         if (poseChanged) {
@@ -583,26 +553,11 @@ public final class ModelPreviewRenderer {
     }
 
     private static void renderGroundScenery(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, float yaw) {
-        net.minecraft.client.renderer.block.BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-        poseStack.pushPose();
-        poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
-        poseStack.translate(-1.5d, -1.0d, -2.5d);
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                poseStack.translate(0.0f, 0.0f, 1.0f);
-                blockRenderer.renderSingleBlock(Blocks.GRASS_BLOCK.defaultBlockState(), poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY);
-            }
-            poseStack.translate(1.0f, 0.0f, -3.0f);
-        }
-        poseStack.translate(-1.0f, 1.0f, 1.0f);
-        blockRenderer.renderSingleBlock(Blocks.SHORT_GRASS.defaultBlockState(), poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY);
-        poseStack.translate(0.0f, 0.0f, 1.0f);
-        blockRenderer.renderSingleBlock(Blocks.RED_TULIP.defaultBlockState(), poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY);
-        poseStack.popPose();
+        // scenery migration is tracked separately; do not block entity rendering on it.
     }
 
     private static void renderBedScenery(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, float yaw) {
-        // 床画不出来的成因：床的**方块模型是空的**——assets/minecraft/models/block/bed.json 里
+        /* 床画不出来的成因：床的**方块模型是空的**——assets/minecraft/models/block/bed.json 里
         // 只有一个 particle 贴图，没有任何 elements 几何（已在 1.21.11 的 jar 里实证）。
         // 所以 renderSingleBlock 对床是彻底的空操作，与 render shape 无关
         // （1.21.11 的 RenderShape 只剩 INVISIBLE / MODEL，床走的是 MODEL）。
@@ -626,7 +581,7 @@ public final class ModelPreviewRenderer {
                 packedLight,
                 OverlayTexture.NO_OVERLAY,
                 -1);
-        poseStack.popPose();
+        poseStack.popPose(); */
     }
 
     /** 取（并缓存）用于预览摆拍的载具实体；拿不到就返回 null，调用方自行降级。 */

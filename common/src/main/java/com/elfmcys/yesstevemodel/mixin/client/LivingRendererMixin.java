@@ -21,7 +21,7 @@ public abstract class LivingRendererMixin extends EntityRenderer<LivingEntity, L
     @Unique
     @Override
     public void tlm$renderNameTag(LivingEntityRenderState state, PoseStack pPoseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
-        super.submitNameTag(state, pPoseStack, collector, cameraState);
+        super.submitNameDisplay(state, pPoseStack, collector, cameraState);
     }
 }
 

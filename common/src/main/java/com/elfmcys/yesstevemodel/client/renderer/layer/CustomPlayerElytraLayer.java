@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
@@ -55,7 +54,7 @@ public class CustomPlayerElytraLayer extends GeoLayerRenderer<CustomPlayerEntity
 //            poseStack.translate(0.0d, 1.5d, 0.0d);
             poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
             this.elytraModel.setupAnim(state);
-            this.elytraModel.renderToBuffer(poseStack, ItemRenderer.getFoilBuffer(bufferSource, RenderTypes.armorCutoutNoCull(cloakTextureLocation), false, stack.hasFoil()), packedLightIn, OverlayTexture.NO_OVERLAY, -1);
+            this.elytraModel.renderToBuffer(poseStack, bufferSource.getBuffer(RenderTypes.armorCutoutNoCull(cloakTextureLocation)), packedLightIn, OverlayTexture.NO_OVERLAY, -1);
             poseStack.popPose();
         }
     }

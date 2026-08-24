@@ -60,7 +60,7 @@ public class CustomFishingHookRenderer {
             anglerZ = (Mth.lerp(partialTick, player.zo, player.getZ()) - (dSin * handOffset)) + (dCos * 0.8d);
             anglerEye = player.isCrouching() ? -0.1875f : 0.0f;
         } else {
-            Vec3 vec3XRot = entityRenderDispatcher.camera.getNearPlane().getPointOnPlane(hand * 0.525f, -0.1f).scale(960.0d / options.fov().get().intValue()).yRot(swingProgressSqrt * 0.5f).xRot((-swingProgressSqrt) * 0.7f);
+            Vec3 vec3XRot = entityRenderDispatcher.camera.getNearPlane(1.0f).getPointOnPlane(hand * 0.525f, -0.1f).scale(960.0d / options.fov().get().intValue()).yRot(swingProgressSqrt * 0.5f).xRot((-swingProgressSqrt) * 0.7f);
             anglerX = Mth.lerp(partialTick, player.xo, player.getX()) + vec3XRot.x;
             anglerY = Mth.lerp(partialTick, player.yo, player.getY()) + vec3XRot.y;
             anglerZ = Mth.lerp(partialTick, player.zo, player.getZ()) + vec3XRot.z;

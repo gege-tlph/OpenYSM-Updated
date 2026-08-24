@@ -56,9 +56,9 @@ public class QueryBinding extends ContextBinding {
         var("life_time", ctx -> ctx.geoInstance().getSeekTime() / 20.0d);
         var("head_x_rotation", ctx -> ctx.data().netHeadYaw);
         var("head_y_rotation", ctx -> ctx.data().headPitch);
-        var("moon_phase", ctx -> (int) ((ctx.level().getDayTime() / 24000L) % 8L));
-        var("time_of_day", ctx -> MolangUtils.normalizeTime(ctx.level().getDayTime()));
-        var("time_stamp", ctx -> ctx.level().getDayTime());
+        var("moon_phase", ctx -> (int) ((ctx.level().getOverworldClockTime() / 24000L) % 8L));
+        var("time_of_day", ctx -> MolangUtils.normalizeTime(ctx.level().getOverworldClockTime()));
+        var("time_stamp", ctx -> ctx.level().getOverworldClockTime());
         var("delta_time", ctx -> ctx.geoInstance().getPositionTracker().getTimeDelta() / 20.0f);
 
         entityVar("yaw_speed", QueryBinding::getYawSpeed);

@@ -31,6 +31,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -550,7 +551,7 @@ public class PlayerModelScreen extends Screen implements IGuiWidget {
         LocalPlayer localPlayer = Minecraft.getInstance().player;
         if (localPlayer != null) {
 //            guiGraphics.guiRenderState.nextStratum();
-            InventoryScreen.renderEntityInInventoryFollowsMouse(guiGraphics, this.guiLeft + 5, this.guiTop + 29, this.guiLeft + 130, this.guiTop + 200, 70, 0.0625F, mouseX, mouseY, localPlayer);
+            InventoryScreen.extractEntityInInventoryFollowsMouse(guiGraphics, this.guiLeft + 5, this.guiTop + 29, this.guiLeft + 130, this.guiTop + 200, 70, mouseX, mouseY, 1.0F, localPlayer);
 //            guiGraphics.guiRenderState.nextStratum();
 
 //            guiGraphics.disableScissor();

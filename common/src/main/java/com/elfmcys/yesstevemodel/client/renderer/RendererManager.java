@@ -46,17 +46,18 @@ public class RendererManager {
             return;
         }
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        EntityRenderDispatcherAccessor accessor = (EntityRenderDispatcherAccessor) entityRenderDispatcher;
         EntityRendererProvider.Context context = new EntityRendererProvider.Context(
                 entityRenderDispatcher,
-                Minecraft.getInstance().getItemModelResolver(),
-                Minecraft.getInstance().getMapRenderer(),
-                Minecraft.getInstance().getBlockRenderer(),
+                accessor.getBlockModelResolver(),
+                accessor.getItemModelResolver(),
+                accessor.getMapRenderer(),
                 resourceManager,
-                Minecraft.getInstance().getEntityModels(),
-                ((EntityRenderDispatcherAccessor) Minecraft.getInstance().getEntityRenderDispatcher()).getEquipmentAssetManager(),
-                Minecraft.getInstance().getAtlasManager(),
-                Minecraft.getInstance().font,
-                Minecraft.getInstance().playerSkinRenderCache()
+                accessor.getEntityModels().get(),
+                accessor.getEquipmentAssetManager(),
+                accessor.getAtlasManager(),
+                accessor.getFont(),
+                accessor.getPlayerSkinRenderCache()
         );
         playerRenderer = new CustomPlayerRenderer(context);
         projectileRenderer = new ProjectileRenderer(context);
