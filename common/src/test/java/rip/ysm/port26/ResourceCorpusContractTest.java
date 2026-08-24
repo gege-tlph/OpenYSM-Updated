@@ -10,6 +10,19 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResourceCorpusContractTest {
+    private static final long EXPECTED_BUILTIN_FILE_COUNT = 621;
+    private static final long EXPECTED_MODEL_DESCRIPTOR_COUNT = 27;
+
+    @Test
+    void builtinResourceCorpusKeepsExactFileCount() throws IOException {
+        Path root = IdentityContractTest.repoFile("common/src/main/resources/assets/yes_steve_model/builtin");
+        try (Stream<Path> stream = Files.walk(root)) {
+            long files = stream.filter(Files::isRegularFile).count();
+            assertTrue(files == EXPECTED_BUILTIN_FILE_COUNT,
+                    "built-in resource corpus changed: expected " + EXPECTED_BUILTIN_FILE_COUNT + ", got " + files);
+        }
+    }
+
     @Test
     void builtinYsmCorpusIsPresent() throws IOException {
         Path root = IdentityContractTest.repoFile("common/src/main/resources/assets/yes_steve_model/builtin");
@@ -19,7 +32,8 @@ class ResourceCorpusContractTest {
                     .filter(path -> path.toString().endsWith(".ysm") || path.getFileName().toString().equals("ysm.json"))
                     .count();
         }
-        assertTrue(files >= 10, "built-in YSM corpus unexpectedly small: " + files);
+        assertTrue(files == EXPECTED_MODEL_DESCRIPTOR_COUNT,
+                "built-in model descriptor corpus changed: expected " + EXPECTED_MODEL_DESCRIPTOR_COUNT + ", got " + files);
     }
 
     @Test
