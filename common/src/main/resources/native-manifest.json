@@ -1,0 +1,46 @@
+{
+  "formatVersion": 1,
+  "abi": "legacy-ysm-core-v1",
+  "requiredMarkers": [
+    "nInitModelCache",
+    "NativeModelRenderer"
+  ],
+  "artifacts": [
+    {
+      "platform": "windows-x64",
+      "path": "natives/windows-x64/ysm-core.dll",
+      "bytes": 252416,
+      "sha256": "b5c4df479060b8808bc70d4d773d588fe6826e76454dfef77e1e927202b47125"
+    },
+    {
+      "platform": "windows-x86",
+      "path": "natives/windows-x86/ysm-core.dll",
+      "bytes": 195584,
+      "sha256": "a06629975d1d95a645e17f438c140ade9e7d300fad60089cc4eb5d12b32e1756"
+    },
+    {
+      "platform": "linux-x64",
+      "path": "natives/linux-x64/libysm-core.so",
+      "bytes": 242296,
+      "sha256": "6d218e79bb07efb837377cdc728717549c1c200c6dfb7bb57539391b6c73de0e"
+    },
+    {
+      "platform": "macos-x64",
+      "path": "natives/macos-x64/libysm-core.dylib",
+      "bytes": 256906,
+      "sha256": "967d19c51b6ac8518ce2bf613c165a31a412b4decf94d8b296ac6b55eba3777b"
+    },
+    {
+      "platform": "macos-arm64",
+      "path": "natives/macos-arm64/libysm-core.dylib",
+      "bytes": 283664,
+      "sha256": "c87b0fe9669ea7d5d20f114487788634774e2e9be7e4fd3edb8ff7b4977ef11b"
+    },
+    {
+      "platform": "android-arm64",
+      "path": "natives/android-arm64/libysm-core.so",
+      "bytes": 338400,
+      "sha256": "a59549cf328a64c84ee5484ec3822ed96f11f3c4923197a87fd425a86aa73d3a"
+    }
+  ]
+}
