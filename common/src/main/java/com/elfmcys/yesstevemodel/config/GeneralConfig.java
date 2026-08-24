@@ -97,11 +97,11 @@ public class GeneralConfig {
         USE_COMPATIBILITY_RENDERER = builder.define("UseCompatibilityRenderer", false);
         builder.comment("Test renderer.");
         USE_GPU_RENDERER = builder.define("UseGpuRenderer", true);
-        ROULETTE_SETTINGS_MODE = builder.defineEnum("RouletteSettingsMode", RouletteSettingsMode.MODERN);
+        ROULETTE_SETTINGS_MODE = builder.defineEnum("RouletteSettingsMode", RouletteSettingsMode.CLASSIC);
         ROULETTE_MODE = builder.defineEnum("RouletteMode", RouletteMode.CLASSIC);
         BLUR_GUI = builder.define("BlurGui", true);
-        TEXTURE_SCREEN_MODE = builder.defineEnum("TextureScreenMode", TextureScreenMode.MODERN);
-        MODEL_INFO_SCREEN_MODE = builder.defineEnum("ModelInfoScreenMode", ModelInfoScreenMode.MODERN);
+        TEXTURE_SCREEN_MODE = builder.defineEnum("TextureScreenMode", TextureScreenMode.CLASSIC);
+        MODEL_INFO_SCREEN_MODE = builder.defineEnum("ModelInfoScreenMode", ModelInfoScreenMode.CLASSIC);
         builder.comment("The amount of volume when the animation is played.");
         SOUND_VOLUME = builder.defineInRange("SoundVolume", 100.0d, 0.0d, 100.0d);
         builder.comment("Whether to display model ID first in the model selection screen, instead of the model name filled in by the model author.");

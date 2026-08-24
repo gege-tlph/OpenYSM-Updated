@@ -57,6 +57,14 @@ class IdentityContractTest {
         assertTrue(pause.contains("new AnimationRouletteScreen"));
     }
 
+    @Test
+    void classicGuiIsTheDefaultPresentation() throws Exception {
+        String config = readRepoFile("common/src/main/java/com/elfmcys/yesstevemodel/config/GeneralConfig.java");
+        assertTrue(config.contains("defineEnum(\"TextureScreenMode\", TextureScreenMode.CLASSIC)"));
+        assertTrue(config.contains("defineEnum(\"ModelInfoScreenMode\", ModelInfoScreenMode.CLASSIC)"));
+        assertTrue(config.contains("defineEnum(\"RouletteSettingsMode\", RouletteSettingsMode.CLASSIC)"));
+    }
+
     private static String readRepoFile(String relative) throws Exception {
         return Files.readString(repoFile(relative), StandardCharsets.UTF_8);
     }
