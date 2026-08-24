@@ -24,6 +24,13 @@ dependencies {
 
     // ImageStream — 用于 avif/webp/jpeg 解码。运行时由 fabric 子项目通过 jar-in-jar 内嵌。
     compileOnly "com.github.TartaricAlkaline:ImageStream:-SNAPSHOT"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:5.12.1"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+    useJUnitPlatform()
 }
 
 tasks.register('compileNative') {
