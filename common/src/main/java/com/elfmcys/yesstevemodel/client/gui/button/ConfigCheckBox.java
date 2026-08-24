@@ -5,7 +5,7 @@ import com.elfmcys.yesstevemodel.client.gui.ISpecialWidget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.InputWithModifiers;
@@ -37,7 +37,7 @@ public class ConfigCheckBox extends AbstractButton implements ISpecialWidget {
     }
 
     @Override
-    public void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         int u = isStateTriggered ? 128 : 0;
         int v = isHovered() ? 12 : 0;
         guiGraphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, TEXTURE, getX(), getY(), u, v, this.width, this.height, 256, 256);
@@ -63,3 +63,4 @@ public class ConfigCheckBox extends AbstractButton implements ISpecialWidget {
         this.defaultButtonNarrationText(output);
     }
 }
+

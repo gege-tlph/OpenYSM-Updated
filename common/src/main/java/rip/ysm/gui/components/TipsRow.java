@@ -2,7 +2,7 @@ package rip.ysm.gui.components;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import rip.ysm.gui.OptionRow;
@@ -36,7 +36,7 @@ public final class TipsRow extends OptionRow<Object> {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         recomputeLines();
         g.fill(getX(), getY(), getX() + width, getY() + height, 0x90000000);
         Font font = Minecraft.getInstance().font;
@@ -48,6 +48,7 @@ public final class TipsRow extends OptionRow<Object> {
     }
 
     @Override
-    protected void renderControl(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderControl(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
     }
 }
+

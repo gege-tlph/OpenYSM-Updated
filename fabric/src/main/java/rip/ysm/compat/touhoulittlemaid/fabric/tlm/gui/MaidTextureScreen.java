@@ -65,3 +65,4 @@ public class MaidTextureScreen extends PlayerTextureScreen {
         }
     }
 }
+

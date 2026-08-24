@@ -30,7 +30,7 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -454,7 +454,7 @@ public class PlayerModelScreen extends Screen implements IGuiWidget {
         }
     }
 
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.fillGradient(this.guiLeft, this.guiTop, this.guiLeft + 135, this.guiTop + 235, -14540254, -14540254);
         guiGraphics.fillGradient(this.guiLeft + 138, this.guiTop, this.guiLeft + 420, this.guiTop + 235, -14540254, -14540254);
@@ -512,11 +512,11 @@ public class PlayerModelScreen extends Screen implements IGuiWidget {
     }
 
     @Override
-    protected void renderBlurredBackground(GuiGraphics guiGraphics) {
+    protected void renderBlurredBackground(GuiGraphicsExtractor guiGraphics) {
 
     }
 
-    private void renderSyncStatus(GuiGraphics guiGraphics) {
+    private void renderSyncStatus(GuiGraphicsExtractor guiGraphics) {
         MutableComponent mutableComponentLiteral;
         ClientModelManager.SyncStatus currentState = ClientModelManager.getSyncStatus();
         switch (currentState.getCurrentState()) {
@@ -546,7 +546,7 @@ public class PlayerModelScreen extends Screen implements IGuiWidget {
         guiGraphics.drawString(this.font, mutableComponentLiteral, iWidth, i + Math.round((14 - 9) / 2.0f), ChatFormatting.DARK_GRAY.getColor().intValue() | 0xFF000000);
     }
 
-    public void renderModelPreview(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderModelPreview(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         LocalPlayer localPlayer = Minecraft.getInstance().player;
         if (localPlayer != null) {
 //            guiGraphics.guiRenderState.nextStratum();
@@ -730,3 +730,4 @@ public class PlayerModelScreen extends Screen implements IGuiWidget {
         STAR
     }
 }
+

@@ -11,7 +11,7 @@ import com.elfmcys.yesstevemodel.client.entity.GeoEntity;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -134,7 +134,7 @@ public class AnimationDebugOverlay {
         return null;
     }
 
-    public static void renderOverlay(Font font, GuiGraphics guiGraphics, int screenWidth, int screenHeight) {
+    public static void renderOverlay(Font font, GuiGraphicsExtractor guiGraphics, int screenWidth, int screenHeight) {
         GeoEntity<?> geoEntity = getActiveModel();
         if (geoEntity == null) {
             return;
@@ -149,7 +149,7 @@ public class AnimationDebugOverlay {
         });
     }
 
-    public static void renderDebugOverlay(Font font, GuiGraphics guiGraphics, int[] currentY, String key, String value, int screenWidth, int screenHeight) {
+    public static void renderDebugOverlay(Font font, GuiGraphicsExtractor guiGraphics, int[] currentY, String key, String value, int screenWidth, int screenHeight) {
         if ((currentY[0] - 5) % 20 == 0) {
             guiGraphics.fill(2, currentY[0] - 1, screenWidth, currentY[0] + 9, -1068478384);
         } else {
@@ -160,3 +160,4 @@ public class AnimationDebugOverlay {
         currentY[0] = currentY[0] + 10;
     }
 }
+

@@ -2,7 +2,6 @@ package rip.ysm.compat.touhoulittlemaid.fabric;
 
 import com.elfmcys.yesstevemodel.geckolib3.geo.animated.AnimatedGeoBone;
 import com.elfmcys.yesstevemodel.geckolib3.geo.animated.AnimatedGeoModel;
-import rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidBoneBridge;
 
 /**
  * common 侧 {@code TouhouMaidBoneProcessor} 的 Fabric 实现。
@@ -20,16 +19,11 @@ public final class TouhouMaidBoneProcessorImpl {
     }
 
     public static Object createLocationBone(AnimatedGeoBone bone) {
-        if (!TouhouLittleMaidCompatImpl.isLoaded()) {
-            return null;
-        }
-        return MaidBoneBridge.createLocationBone(bone);
+        return null;
     }
 
     public static Object createLocationModel(AnimatedGeoModel model) {
-        if (!TouhouLittleMaidCompatImpl.isLoaded()) {
-            return null;
-        }
-        return MaidBoneBridge.createLocationModel(model);
+        return null;
     }
 }
+

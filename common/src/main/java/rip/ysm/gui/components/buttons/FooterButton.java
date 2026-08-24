@@ -1,7 +1,7 @@
 package rip.ysm.gui.components.buttons;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -18,7 +18,7 @@ public class FooterButton extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         int bg = !active ? 0x90282828 : (isHovered() ? new Color(0x90171717, true).getRGB() : 0x90000000);
         g.fill(getX(), getY(), getX() + width, getY() + height, bg);
         int tw = Minecraft.getInstance().font.width(getMessage());
@@ -36,3 +36,4 @@ public class FooterButton extends AbstractWidget {
         defaultButtonNarrationText(out);
     }
 }
+

@@ -1,7 +1,7 @@
 package rip.ysm.gui;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -23,7 +23,7 @@ public abstract class OptionRow<T> extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         boolean dirty = option != null && option.isDirty();
         int bg = isHovered() ? 0x90171717 : (dirty ? 0x90060606 : 0x90000000);
         g.fill(getX(), getY(), getX() + width, getY() + height, bg);
@@ -36,7 +36,7 @@ public abstract class OptionRow<T> extends AbstractWidget {
         renderControl(g, mouseX, mouseY, partialTick);
     }
 
-    protected abstract void renderControl(GuiGraphics g, int mouseX, int mouseY, float partialTick);
+    protected abstract void renderControl(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick);
 
     protected int controlX() {
         return getX() + width - controlWidth() - 6;
@@ -67,7 +67,7 @@ public abstract class OptionRow<T> extends AbstractWidget {
     public void closeOverlay() {
     }
 
-    public void renderOverlay(GuiGraphics g, int mouseX, int mouseY, float partialTick, float scrollDisplay) {
+    public void renderOverlay(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick, float scrollDisplay) {
     }
 
     public boolean overlayMouseClicked(double mouseX, double mouseY, int button, float scrollDisplay) {
@@ -92,3 +92,4 @@ public abstract class OptionRow<T> extends AbstractWidget {
         defaultButtonNarrationText(out);
     }
 }
+

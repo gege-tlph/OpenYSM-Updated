@@ -3,7 +3,7 @@ package rip.ysm.gpu;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
@@ -13,11 +13,11 @@ public final class Pie {
     private static final Matrix4f mvpScratch = new Matrix4f();
     private static final float[] mvpFloats = new float[16];
 
-    public static void draw(GuiGraphics graphics, float centerX, float centerY, float innerRadius, float outerRadius, float startAngle, float endAngle, int rgba) {
+    public static void draw(GuiGraphicsExtractor graphics, float centerX, float centerY, float innerRadius, float outerRadius, float startAngle, float endAngle, int rgba) {
         draw(graphics, centerX, centerY, innerRadius, outerRadius, startAngle, endAngle, rgba, 1.0f);
     }
 
-    public static void draw(GuiGraphics graphics, float centerX, float centerY, float innerRadius, float outerRadius, float startAngle, float endAngle, int rgba, float feather) {
+    public static void draw(GuiGraphicsExtractor graphics, float centerX, float centerY, float innerRadius, float outerRadius, float startAngle, float endAngle, int rgba, float feather) {
         if (!PieShader.ensureCompiled()) return;
 
         float pad = feather + 1.0f;
@@ -64,3 +64,4 @@ public final class Pie {
         GlStateManager._disableBlend();
     }
 }
+

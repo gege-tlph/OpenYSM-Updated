@@ -9,7 +9,7 @@ import com.elfmcys.yesstevemodel.molang.parser.ParseException;
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
 import com.elfmcys.yesstevemodel.network.message.C2SRequestExecuteMolangPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -51,7 +51,7 @@ public class AnimationSlider extends RangedSliderWidget implements ISpecialWidge
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderWidget(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         guiGraphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, ROULETTE_TEXTURE, getX(), getY(), 0, 24, this.width - 4, this.height, 256, 256);
         guiGraphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, ROULETTE_TEXTURE, getX() + this.width - 4, getY(), 196, 24, 4, this.height, 256, 256);
@@ -62,3 +62,4 @@ public class AnimationSlider extends RangedSliderWidget implements ISpecialWidge
         guiGraphics.drawCenteredString(minecraft.font, this.getMessage(), getX() + this.width / 2, getY() + (this.height - 8) / 2, color);
     }
 }
+

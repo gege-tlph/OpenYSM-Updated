@@ -17,7 +17,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -180,12 +180,12 @@ public class ModelSettingsScreen extends OptionScreen {
     }
 
     @Override
-    protected void renderExtras(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderExtras(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         g.fill(previewLeft, previewTop, previewRight, previewBottom, 0x66000000);
         renderPreview(g, partialTick);
     }
 
-    private void renderPreview(GuiGraphics g, float partialTick) {
+    private void renderPreview(GuiGraphicsExtractor g, float partialTick) {
         if (this.minecraft == null || this.minecraft.player == null) return;
         if (!(animatable instanceof LivingAnimatable<?> la)) return;
         double scale = this.minecraft.getWindow().getGuiScale();
@@ -310,3 +310,4 @@ public class ModelSettingsScreen extends OptionScreen {
     }
 
 }
+

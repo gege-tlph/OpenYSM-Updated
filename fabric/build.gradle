@@ -2,20 +2,24 @@ plugins {
     id 'com.gradleup.shadow'
 }
 
-architectury {
-    platformSetupLoomIde()
-    fabric()
+sourceSets {
+    main {
+        java {
+            srcDir rootProject.file('common/src/main/java')
+        }
+        resources {
+            srcDir rootProject.file('common/src/main/resources')
+        }
+        java.exclude 'rip/ysm/compat/touhoulittlemaid/fabric/tlm/**'
+    }
+    test {
+        java {
+            srcDir rootProject.file('common/src/test/java')
+        }
+    }
 }
 
 configurations {
-    common {
-        canBeResolved = true
-        canBeConsumed = false
-    }
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentFabric.extendsFrom common
-
     // Files in this configuration will be bundled into your mod using the Shadow plugin.
     // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
     shadowBundle {
@@ -30,10 +34,9 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
     include "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
-    modImplementation("dev.architectury:architectury-fabric:$rootProject.architectury_api_version") {
-        exclude group: "net.fabricmc.fabric-api", module: "fabric-api"
-    }
-    include "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
+    modImplementation "maven.modrinth:architectury-api:20.0.12+fabric"
+    include "maven.modrinth:architectury-api:20.0.12+fabric"
+    modImplementation "dev.architectury:architectury-injectables:1.0.10"
 
     modImplementation "maven.modrinth:forge-config-api-port:$rootProject.forge_config_api_port_version"
     include "maven.modrinth:forge-config-api-port:$rootProject.forge_config_api_port_version"
@@ -48,20 +51,12 @@ dependencies {
     implementation "com.github.TartaricAlkaline:ImageStream:-SNAPSHOT"
     include "com.github.TartaricAlkaline:ImageStream:-SNAPSHOT"
 
-    modCompileOnly "maven.modrinth:iris:1.10.7+1.21.11-fabric"
+    // Optional shader integration is pinned to the 26.1 line; it is compile-only.
+    modCompileOnly "maven.modrinth:iris:1.10.9+26.1-fabric"
 
-    // TLM compat: compile against our maintained Touhou Little Maid: Tsumugi fork
-    // (1.21.11 Fabric, jar dropped into libs/ from the TLM repo's remapJar output).
-    modCompileOnly "libs:touhoulittlemaid-fabric:0.8.5-neo1.5.3+mc1.21.11"
-    // 开发运行时也要装上它，否则 runClient 里根本没有女仆，本 fork 的 TLM 集成整条无法自测。
-    // modLocalRuntime 只作用于开发环境：不进 remapJar，不进 fabric.mod.json 的 depends。
-    modLocalRuntime "libs:touhoulittlemaid-fabric:0.8.5-neo1.5.3+mc1.21.11"
+    // TLM is intentionally absent from the first 26.1.2 playable node. The
+    // compat package remains source-compatible but does not gate this build.
 
-    // Pull common's compile output (named/mojmap) into fabric for both compile and dev-runtime.
-    common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
-    // Must use transformProductionFabric (not namedElements) so architectury rewrites
-    // @ExpectPlatform stubs to delegate to *Impl — otherwise runtime AssertionError.
-    shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 }
 
 processResources {

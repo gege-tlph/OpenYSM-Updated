@@ -3,7 +3,7 @@ package rip.ysm.gpu;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -73,7 +73,7 @@ public final class BlurStack {
         return regions.isEmpty();
     }
 
-    public static void flush(GuiGraphics graphics) {
+    public static void flush(GuiGraphicsExtractor graphics) {
         if (regions.isEmpty()) return;
         if (!BlurShader.ensureCompiled()) {
             regions.clear();
@@ -157,3 +157,4 @@ public final class BlurStack {
         int tintRgba;
     }
 }
+

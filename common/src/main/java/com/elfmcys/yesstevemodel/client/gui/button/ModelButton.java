@@ -24,7 +24,7 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.InputWithModifiers;
@@ -152,7 +152,7 @@ public class ModelButton extends Button {
         }
     }
 
-    public void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         AnimationTracker c0117x8455a741Mo1262xaffeef43 = this.modelIdHolder.getAnimationStateMachine();
         if (isHovered()) {
             this.lastHoverTime = Util.getMillis();
@@ -222,7 +222,7 @@ public class ModelButton extends Button {
 
     }
 
-    public void renderTooltip(GuiGraphics guiGraphics, Screen screen, int mouseX, int mouseY) {
+    public void renderTooltip(GuiGraphicsExtractor guiGraphics, Screen screen, int mouseX, int mouseY) {
         if (isHovered()) {
             String selected = Minecraft.getInstance().getLanguageManager().getSelected();
             if (!Objects.equals(this.cachedLanguage, selected)) {
@@ -248,3 +248,4 @@ public class ModelButton extends Button {
         return !this.isStarred && this.active && this.visible && this.isMouseOver(mouseX, mouseY);
     }
 }
+

@@ -1,8 +1,6 @@
 package rip.ysm.compat.touhoulittlemaid.fabric;
 
 import net.minecraft.world.entity.Entity;
-import rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidRenderStore;
-
 import java.util.Optional;
 
 /**
@@ -17,9 +15,7 @@ public final class MaidCapabilityBridgeImpl {
     }
 
     public static Optional<Object> get(Entity entity) {
-        if (!TouhouLittleMaidCompatImpl.isLoaded()) {
-            return Optional.empty();
-        }
-        return MaidRenderStore.get(entity).map(state -> state);
+        return Optional.empty();
     }
 }
+

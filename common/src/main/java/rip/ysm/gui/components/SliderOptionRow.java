@@ -1,7 +1,7 @@
 package rip.ysm.gui.components;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -33,7 +33,7 @@ public class SliderOptionRow extends OptionRow<Double> {
     }
 
     @Override
-    protected void renderControl(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderControl(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         int cx = controlX();
         int cy = controlY();
         int cw = controlWidth();
@@ -81,3 +81,4 @@ public class SliderOptionRow extends OptionRow<Double> {
         option.setPending(Mth.clamp(raw, min, max));
     }
 }
+

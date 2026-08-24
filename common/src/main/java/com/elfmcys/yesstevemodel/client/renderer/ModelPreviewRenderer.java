@@ -19,13 +19,13 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.NonNullList;
 import net.minecraft.util.Mth;
@@ -341,7 +341,7 @@ public final class ModelPreviewRenderer {
     }
 
     // 纸娃娃
-    public static void renderPlayerOverlay(GuiGraphics guiGraphics, LocalPlayer localPlayer, double x, double y, float scale, float yawOffset, int zDepth, float partialTick) {
+    public static void renderPlayerOverlay(GuiGraphicsExtractor guiGraphics, LocalPlayer localPlayer, double x, double y, float scale, float yawOffset, int zDepth, float partialTick) {
         setExtraPlayerMode(true);
 
         Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
@@ -368,7 +368,7 @@ public final class ModelPreviewRenderer {
     }
 
     public static void submitLivingEntityPreview(
-            GuiGraphics guiGraphics,
+            GuiGraphicsExtractor guiGraphics,
             int x0, int y0, int x1, int y1,
             int displaySize,
             float partialTick,
@@ -430,7 +430,7 @@ public final class ModelPreviewRenderer {
     }
 
     public static void submitPlayerOverlay(
-            GuiGraphics guiGraphics,
+            GuiGraphicsExtractor guiGraphics,
             LocalPlayer localPlayer,
             double x, double y,
             float scale,
@@ -469,7 +469,7 @@ public final class ModelPreviewRenderer {
     }
 
     public static void submitTexturePreview(
-            GuiGraphics guiGraphics,
+            GuiGraphicsExtractor guiGraphics,
             int x0, int y0, int x1, int y1,
             float anchorX, float anchorY,
             float zoom,
@@ -694,3 +694,4 @@ public final class ModelPreviewRenderer {
         poseStack.popPose();
     }
 }
+

@@ -12,7 +12,7 @@ import com.elfmcys.yesstevemodel.network.message.C2SRequestSwitchModelPacket;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.player.LocalPlayer;
@@ -47,7 +47,7 @@ public class TextureButton extends Button {
         }
     }
 
-    public void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
         guiGraphics.fillGradient(getX(), getY(), getX() + this.width, getY() + this.height, -12369342, -12369342);
@@ -69,7 +69,7 @@ public class TextureButton extends Button {
         }
     }
 
-    public void renderPlayerPreview(GuiGraphics guiGraphics, float partialTick) {
+    public void renderPlayerPreview(GuiGraphicsExtractor guiGraphics, float partialTick) {
         ModelPreviewRenderer.submitLivingEntityPreview(
                 guiGraphics,
                 getX(), getY(), getX() + this.width, (getY() + this.height) - 20,
@@ -81,3 +81,4 @@ public class TextureButton extends Button {
         );
     }
 }
+

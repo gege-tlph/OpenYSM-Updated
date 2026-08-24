@@ -172,7 +172,7 @@ public abstract class GeoReplacedEntityRenderer<TEntity extends Player, T extend
             poseStack.popPose();
         }
         net.minecraft.client.renderer.SubmitNodeCollector activeCollector = com.elfmcys.yesstevemodel.client.renderer.RenderContext.collector();
-        net.minecraft.client.renderer.state.CameraRenderState activeCameraState = com.elfmcys.yesstevemodel.client.renderer.RenderContext.camera();
+        net.minecraft.client.renderer.state.level.CameraRenderState activeCameraState = com.elfmcys.yesstevemodel.client.renderer.RenderContext.camera();
         if (activeCollector != null && activeCameraState != null
                 && entity != null && entity != minecraft.getCameraEntity()) {
             ((LivingEntityRendererAccessor) this).tlm$renderNameTag(state, poseStack, activeCollector, activeCameraState);
@@ -246,3 +246,4 @@ public abstract class GeoReplacedEntityRenderer<TEntity extends Player, T extend
         HumanoidMobRenderer.extractHumanoidRenderState(entity, state, partialTick, this.itemModelResolver);
     }
 }
+

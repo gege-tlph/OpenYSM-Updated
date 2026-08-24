@@ -1,7 +1,7 @@
 package com.elfmcys.yesstevemodel.client.renderer;
 
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import org.jetbrains.annotations.Nullable;
 
 public final class RenderContext {
@@ -31,3 +31,4 @@ public final class RenderContext {
         return CAMERA.get();
     }
 }
+

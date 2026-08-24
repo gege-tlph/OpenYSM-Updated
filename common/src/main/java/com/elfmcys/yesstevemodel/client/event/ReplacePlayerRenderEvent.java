@@ -13,7 +13,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.entity.player.Player;
 import rip.ysm.compat.firstperson.FirstPersonCompat;
 import rip.ysm.compat.oculus.OculusCompat;
@@ -64,3 +64,4 @@ public class ReplacePlayerRenderEvent {
         return cancelled[0];
     }
 }
+

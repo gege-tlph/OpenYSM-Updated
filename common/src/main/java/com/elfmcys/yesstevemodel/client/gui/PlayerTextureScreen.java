@@ -17,7 +17,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
@@ -211,7 +211,7 @@ public class PlayerTextureScreen extends Screen {
         }
     }
 
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         if (Minecraft.getInstance().player == null) {
             return;
         }
@@ -240,11 +240,11 @@ public class PlayerTextureScreen extends Screen {
     }
 
     @Override
-    protected void renderBlurredBackground(GuiGraphics guiGraphics) {
+    protected void renderBlurredBackground(GuiGraphicsExtractor guiGraphics) {
 
     }
 
-    public void renderTexturePreview(GuiGraphics guiGraphics, float partialTick) {
+    public void renderTexturePreview(GuiGraphicsExtractor guiGraphics, float partialTick) {
         PlayerCapability.get(this.minecraft.player).ifPresent(cap -> {
             this.modelHolder.initModelWithTexture(this.modelId, cap.getCurrentTextureName());
             // Scissor / PIP rect is the central preview panel (93..299 horizontally,
@@ -370,3 +370,4 @@ public class PlayerTextureScreen extends Screen {
         return false;
     }
 }
+

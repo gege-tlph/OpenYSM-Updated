@@ -1,7 +1,7 @@
 package rip.ysm.gui.components;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -26,7 +26,7 @@ public class EnumOptionRow<E extends Enum<E>> extends OptionRow<E> {
     }
 
     @Override
-    protected void renderControl(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderControl(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         int cx = controlX();
         int cy = controlY();
         int cw = controlWidth();
@@ -70,7 +70,7 @@ public class EnumOptionRow<E extends Enum<E>> extends OptionRow<E> {
     }
 
     @Override
-    public void renderOverlay(GuiGraphics g, int mouseX, int mouseY, float partialTick, float scrollDisplay) {
+    public void renderOverlay(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick, float scrollDisplay) {
         if (!open) return;
         int cx = controlX();
         int cw = controlWidth();
@@ -169,3 +169,4 @@ public class EnumOptionRow<E extends Enum<E>> extends OptionRow<E> {
         return 0;
     }
 }
+

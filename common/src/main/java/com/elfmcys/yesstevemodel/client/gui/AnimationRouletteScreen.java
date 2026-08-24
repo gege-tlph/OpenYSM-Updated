@@ -32,7 +32,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -336,7 +336,7 @@ public class AnimationRouletteScreen extends Screen {
             }
         }) {
             @Override
-            public void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
                 guiGraphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), -280804798);
                 super.renderContents(guiGraphics, mouseX, mouseY, partialTick);
             }
@@ -360,7 +360,7 @@ public class AnimationRouletteScreen extends Screen {
         return value;
     }
 
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         int scrolledMouseY;
         guiGraphics.drawCenteredString(this.font, Component.translatable("gui.yes_steve_model.roulette.path", StringUtils.joinWith(" > ", navigationStack.stream().map((v0) -> {
             return v0.getLeft();
@@ -391,7 +391,7 @@ public class AnimationRouletteScreen extends Screen {
         renderHoverTooltip(guiGraphics, mouseX, scrolledMouseY);
     }
 
-    private void renderHoverTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    private void renderHoverTooltip(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         if (-1 < this.hoveredIndex && this.hoveredIndex < this.currentProperties.size()) {
             String str = ModelMetadataPresenter.getLocalizedModelString(this.renderContext, "properties.extra_animation.%s.desc".formatted(this.currentProperties.getKeyAt(this.hoveredIndex)), StringPool.EMPTY);
             if (StringUtils.isNotBlank(str)) {
@@ -408,7 +408,7 @@ public class AnimationRouletteScreen extends Screen {
         }
     }
 
-    private void renderPageInfo(GuiGraphics guiGraphics) {
+    private void renderPageInfo(GuiGraphicsExtractor guiGraphics) {
         guiGraphics.fill(this.centerX + 157, this.centerY - 87, this.centerX + 238, this.centerY - 72, -822083584);
         guiGraphics.drawCenteredString(this.font, String.format("%d/%d", Integer.valueOf(this.currentNavEntry.getRight().intValue() + 1), Integer.valueOf(((this.currentProperties.size() - 1) / 8) + 1)), this.centerX + 197, this.centerY - 83, ChatFormatting.AQUA.getColor().intValue() | 0xFF000000);
     }
@@ -569,7 +569,7 @@ public class AnimationRouletteScreen extends Screen {
         return false;
     }
 
-    private void renderRadialButtons(GuiGraphics guiGraphics) {
+    private void renderRadialButtons(GuiGraphicsExtractor guiGraphics) {
         float angle = 0.3926991f;
         int size = this.currentProperties.size() - (this.currentNavEntry.getRight().intValue() * 8);
         for (int i = 0; i < Math.min(8, size); i++) {
@@ -602,7 +602,7 @@ public class AnimationRouletteScreen extends Screen {
         }
     }
 
-    private void renderKeyBindings(GuiGraphics guiGraphics, int slotIndex, int x, int y) {
+    private void renderKeyBindings(GuiGraphicsExtractor guiGraphics, int slotIndex, int x, int y) {
         MutableComponent mutableComponentWithStyle = Component.literal("[ ").withStyle(ChatFormatting.YELLOW);
         KeyMapping keyMapping = ExtraAnimationKey.KEY_MAPPINGS.get(slotIndex);
         if (keyMapping.isUnbound()) {
@@ -614,7 +614,7 @@ public class AnimationRouletteScreen extends Screen {
         guiGraphics.drawCenteredString(this.font, mutableComponentWithStyle, x, y + 4, 0xFFF3F0E0);
     }
 
-    private void renderWrappedLabel(GuiGraphics guiGraphics, MutableComponent mutableComponent, int x, int y, boolean isSubmenu) {
+    private void renderWrappedLabel(GuiGraphicsExtractor guiGraphics, MutableComponent mutableComponent, int x, int y, boolean isSubmenu) {
         Objects.requireNonNull(this.font);
         if (isSubmenu) {
             mutableComponent = mutableComponent.withStyle(ChatFormatting.RED);
@@ -631,7 +631,7 @@ public class AnimationRouletteScreen extends Screen {
         }
     }
 
-    private void renderRadialBackground(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    private void renderRadialBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         if (this.currentProperties.isEmpty()) {
             return;
         }
@@ -668,7 +668,7 @@ public class AnimationRouletteScreen extends Screen {
         }
     }
 
-    private boolean checkRadialHover(GuiGraphics guiGraphics, float startAngle, float pointerAngle, float endAngle, float pointerRadius, boolean alreadyHovered, boolean isSubmenu, int index) {
+    private boolean checkRadialHover(GuiGraphicsExtractor guiGraphics, float startAngle, float pointerAngle, float endAngle, float pointerRadius, boolean alreadyHovered, boolean isSubmenu, int index) {
         boolean isHovered = startAngle < pointerAngle && pointerAngle < endAngle && 50.0f < pointerRadius && pointerRadius < 100.0f;
         if (isHovered) {
             alreadyHovered = true;
@@ -687,7 +687,7 @@ public class AnimationRouletteScreen extends Screen {
         return alreadyHovered;
     }
 
-    private void drawRadialSegment(GuiGraphics guiGraphics, float innerRadius, float outerRadius, float startAngle, float endAngle, int color) {
+    private void drawRadialSegment(GuiGraphicsExtractor guiGraphics, float innerRadius, float outerRadius, float startAngle, float endAngle, int color) {
         float startCos = Mth.cos(startAngle);
         float startSin = Mth.sin(startAngle);
         float endCos = Mth.cos(endAngle);
@@ -712,3 +712,4 @@ public class AnimationRouletteScreen extends Screen {
     }
 
 }
+

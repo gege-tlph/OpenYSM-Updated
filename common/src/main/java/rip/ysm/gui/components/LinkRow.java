@@ -3,7 +3,7 @@ package rip.ysm.gui.components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -23,7 +23,7 @@ public final class LinkRow extends OptionRow<Object> {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         boolean hover = isHovered();
         g.fill(getX(), getY(), getX() + width, getY() + height, hover ? 0x90171717 : 0x90000000);
         Font font = Minecraft.getInstance().font;
@@ -37,7 +37,7 @@ public final class LinkRow extends OptionRow<Object> {
     }
 
     @Override
-    protected void renderControl(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderControl(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
     }
 
     @Override
@@ -45,3 +45,4 @@ public final class LinkRow extends OptionRow<Object> {
         owner.openUrlWithConfirm(url);
     }
 }
+

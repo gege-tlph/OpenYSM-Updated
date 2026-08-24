@@ -1,6 +1,6 @@
 package rip.ysm.gui.components;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import rip.ysm.gui.Option;
 import rip.ysm.gui.OptionRow;
@@ -11,7 +11,7 @@ public class BooleanOptionRow extends OptionRow<Boolean> {
     }
 
     @Override
-    protected void renderControl(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderControl(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         int size = Math.min(controlHeight(), 14);
         int cx = controlX() + controlWidth() - size;
         int cy = controlY() + (controlHeight() - size) / 2;
@@ -32,3 +32,4 @@ public class BooleanOptionRow extends OptionRow<Boolean> {
         }
     }
 }
+

@@ -11,7 +11,7 @@ import com.elfmcys.yesstevemodel.geckolib3.core.molang.util.StringPool;
 import com.elfmcys.yesstevemodel.util.data.OrderedStringMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -216,7 +216,7 @@ public class ModernPlayerTextureScreen extends OptionScreen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         hoveredIcon = null;
         for (IconButton btn : icons) {
             if (btn.contains(mouseX, mouseY)) {
@@ -228,7 +228,7 @@ public class ModernPlayerTextureScreen extends OptionScreen {
         for (IconButton btn : icons) drawIcon(g, btn);
     }
 
-    private void drawIcon(GuiGraphics g, IconButton btn) {
+    private void drawIcon(GuiGraphicsExtractor g, IconButton btn) {
         boolean hover = btn == hoveredIcon;
         int bg = hover ? 0x90171717 : 0x90000000;
         g.fill(btn.x, btn.y, btn.x + btn.size, btn.y + btn.size, bg);
@@ -292,13 +292,13 @@ public class ModernPlayerTextureScreen extends OptionScreen {
     }
 
     @Override
-    protected void renderExtras(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderExtras(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         g.fill(previewLeft, previewTop, previewRight, previewBottom, 0x66000000);
         renderPreview(g, partialTick);
     }
 
     @Override
-    protected void renderDescription(GuiGraphics g, int descY) {
+    protected void renderDescription(GuiGraphicsExtractor g, int descY) {
         if (hoveredIcon != null) {
             g.fill(panelLeft, descY, panelRight, descY + 28, 0x80000000);
             g.drawString(this.font, hoveredIcon.tooltip, panelLeft + 6, descY + 10, -1, false);
@@ -311,7 +311,7 @@ public class ModernPlayerTextureScreen extends OptionScreen {
         }
     }
 
-    private void renderPreview(GuiGraphics g, float partialTick) {
+    private void renderPreview(GuiGraphicsExtractor g, float partialTick) {
         if (this.minecraft == null || this.minecraft.player == null) return;
         if (!modelHolder.getAnimationStateMachine().isCurrentAnimation(currentAnimation)) {
             modelHolder.getAnimationStateMachine().setCurrentAnimation(currentAnimation);
@@ -385,3 +385,4 @@ public class ModernPlayerTextureScreen extends OptionScreen {
         return mouseX >= previewLeft && mouseX < previewRight && mouseY >= previewTop && mouseY < previewBottom;
     }
 }
+

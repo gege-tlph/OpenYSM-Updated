@@ -1,7 +1,3 @@
-architectury {
-    common rootProject.enabled_platforms.split(',')
-}
-
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
@@ -13,6 +9,7 @@ dependencies {
 
     // Architectury API common artifact — 提供 Event<>、ClientLifecycleEvent、PlayerEvent 等抽象事件类型。
     modCompileOnly "dev.architectury:architectury:$rootProject.architectury_api_version"
+    modCompileOnly "dev.architectury:architectury-injectables:1.0.10"
 
     // Forge Config API Port — 让 common 在编译期看到 net.minecraftforge.common.ForgeConfigSpec 等类。
     // 运行时由 fabric 子项目通过 modImplementation 引入 port。

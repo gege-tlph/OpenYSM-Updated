@@ -6,8 +6,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
-import rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidEventHandler;
-import rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidModelHandler;
 
 /**
  * TLM 兼容第二入口（服务端/通用侧）的 Fabric 平台实现。
@@ -32,7 +30,7 @@ public final class TouhouMaidCompatImpl {
     }
 
     public static boolean isMaidEntity(Entity entity) {
-        return isLoaded() && MaidEventHandler.isMaid(entity);
+        return false;
     }
 
     public static void handleProjectileOwner(Projectile projectile, Entity entity) {
@@ -40,9 +38,6 @@ public final class TouhouMaidCompatImpl {
     }
 
     public static void registerAnimationRoulette(Entity entity, String classify, int index) {
-        if (isLoaded()) {
-            MaidModelHandler.activateRouletteAnimation(entity, classify, index);
-        }
     }
 
     /**
@@ -55,8 +50,6 @@ public final class TouhouMaidCompatImpl {
 
     @Environment(EnvType.CLIENT)
     public static void playMaidAnimation(Entity entity, String expression) {
-        if (isLoaded()) {
-            MaidModelHandler.executeMaidMolang(entity, expression);
-        }
     }
 }
+

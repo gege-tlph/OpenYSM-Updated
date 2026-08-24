@@ -4,7 +4,7 @@ import com.elfmcys.yesstevemodel.client.ClientModelManager;
 import com.elfmcys.yesstevemodel.config.LoadingStateConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import rip.ysm.api.client.HudOverlay;
@@ -20,7 +20,7 @@ public class ModelSyncStateOverlay implements HudOverlay {
     private static float shimmerPhase = 0.0f;
 
     @Override
-    public void render(GuiGraphics guiGraphics, Font font, float partialTick, int screenWidth, int screenHeight) {
+    public void render(GuiGraphicsExtractor guiGraphics, Font font, float partialTick, int screenWidth, int screenHeight) {
         int textX;
         int textY;
         int barX;
@@ -119,7 +119,7 @@ public class ModelSyncStateOverlay implements HudOverlay {
         renderSyncText(font, guiGraphics, prefixText, textX, textY, screenWidth);
     }
 
-    private static void drawAnimatedBar(GuiGraphics g, int x, int y, float target, int fgColor, boolean shimmer) {
+    private static void drawAnimatedBar(GuiGraphicsExtractor g, int x, int y, float target, int fgColor, boolean shimmer) {
         long now = System.nanoTime();
         if (lastFrameNanos == 0L) lastFrameNanos = now;
         float dt = Math.min(0.1f, (now - lastFrameNanos) / 1.0e9f);
@@ -160,7 +160,7 @@ public class ModelSyncStateOverlay implements HudOverlay {
         shimmerPhase = 0.0f;
     }
 
-    private void renderSyncText(Font font, GuiGraphics guiGraphics, MutableComponent textComponent, int baseX, int textY, int screenWidth) {
+    private void renderSyncText(Font font, GuiGraphicsExtractor guiGraphics, MutableComponent textComponent, int baseX, int textY, int screenWidth) {
         int drawX;
         int textWidth = font.width(textComponent);
 
@@ -172,3 +172,4 @@ public class ModelSyncStateOverlay implements HudOverlay {
         guiGraphics.drawString(font, textComponent, drawX, textY, -1);
     }
 }
+

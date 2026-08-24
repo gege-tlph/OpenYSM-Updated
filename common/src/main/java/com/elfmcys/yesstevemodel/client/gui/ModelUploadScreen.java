@@ -4,7 +4,7 @@ import com.elfmcys.yesstevemodel.client.gui.button.FlatColorButton;
 import com.elfmcys.yesstevemodel.client.upload.ModelUploadSession;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -27,7 +27,7 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
         this.parentScreen = parent;
     }
 
-    private static void drawBorder(GuiGraphics g, int x1, int y1, int x2, int y2, int w, int color) {
+    private static void drawBorder(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2, int w, int color) {
         g.fill(x1, y1, x2, y1 + w, color);
         g.fill(x1, y2 - w, x2, y2, color);
         g.fill(x1, y1, x1 + w, y2, color);
@@ -89,7 +89,7 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         g.fill(0, 0, this.width, this.height, 0xC0000000);
 
         long sinceFlash = Util.getMillis() - this.lastFlashTime;
@@ -122,7 +122,7 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
         super.render(g, mouseX, mouseY, partialTick);
     }
 
-    private void renderEmptyState(GuiGraphics guiGraphics) {
+    private void renderEmptyState(GuiGraphicsExtractor guiGraphics) {
         MutableComponent main = Component.literal("Drag a YSM file into this window").withStyle(ChatFormatting.WHITE);
         MutableComponent sub = Component.literal("Require standalone ysm model file.").withStyle(ChatFormatting.GRAY);
         int cx = this.width / 2;
@@ -142,7 +142,7 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
         }
     }
 
-    private void renderSessionState(GuiGraphics guiGraphics, ModelUploadSession session) {
+    private void renderSessionState(GuiGraphicsExtractor guiGraphics, ModelUploadSession session) {
         int cx = this.width / 2;
         int cy = this.height / 2;
         ChatFormatting color = switch (session.getState()) {
@@ -216,3 +216,4 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
         Minecraft.getInstance().setScreen(this.parentScreen);
     }
 }
+

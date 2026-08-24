@@ -8,7 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -56,7 +56,7 @@ public class AuthorButton extends Button {
         return new AuthorButton(x, y, null, null, null, -1, screen);
     }
 
-    public void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         Font font = Minecraft.getInstance().font;
         if (this.authorInfo == null || this.modelAssembly == null || this.Identifier == null) {
             guiGraphics.fillGradient(getX(), getY(), getX() + this.width, getY() + this.height, -1891417534, -1891417534);
@@ -77,7 +77,7 @@ public class AuthorButton extends Button {
         drawWrappedText(guiGraphics, Component.literal(str3), getX() + 3, getY() + 95, 64, -1);
     }
 
-    public void drawWrappedText(GuiGraphics guiGraphics, FormattedText formattedText, int x, int y, int wrapWidth, int color) {
+    public void drawWrappedText(GuiGraphicsExtractor guiGraphics, FormattedText formattedText, int x, int y, int wrapWidth, int color) {
         Font font = Minecraft.getInstance().font;
         for (FormattedCharSequence formattedCharSequence : font.split(formattedText, wrapWidth)) {
             guiGraphics.drawString(font, formattedCharSequence, x, y, color, false);
@@ -88,7 +88,7 @@ public class AuthorButton extends Button {
         }
     }
 
-    public void refreshContactComponents(GuiGraphics guiGraphics, Screen screen, int mouseX, int mouseY) {
+    public void refreshContactComponents(GuiGraphicsExtractor guiGraphics, Screen screen, int mouseX, int mouseY) {
         if (this.isHovered && !this.componentList.isEmpty()) {
             guiGraphics.setComponentTooltipForNextFrame(Minecraft.getInstance().font, this.componentList, mouseX, mouseY);
         } else if (this.selectedContactIndex != -1) {
@@ -163,3 +163,4 @@ public class AuthorButton extends Button {
         renderTooltip(true);
     }
 }
+

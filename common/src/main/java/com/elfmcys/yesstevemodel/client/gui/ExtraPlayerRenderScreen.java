@@ -3,7 +3,7 @@ package com.elfmcys.yesstevemodel.client.gui;
 import com.elfmcys.yesstevemodel.client.renderer.ModelPreviewRenderer;
 import com.elfmcys.yesstevemodel.config.ExtraPlayerRenderConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.Screen;
@@ -68,7 +68,7 @@ public class ExtraPlayerRenderScreen extends Screen {
                 .build());
     }
 
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         int boxLeft = this.mouseStartX;
         int boxTop = this.mouseStartY;
         int boxRight = (int) (boxLeft + (this.rotationX));
@@ -98,7 +98,7 @@ public class ExtraPlayerRenderScreen extends Screen {
     }
 
     @Override
-    protected void renderBlurredBackground(net.minecraft.client.gui.GuiGraphics guiGraphics) {
+    protected void renderBlurredBackground(net.minecraft.client.gui.GuiGraphicsExtractor guiGraphics) {
 
     }
 
@@ -170,3 +170,4 @@ public class ExtraPlayerRenderScreen extends Screen {
     }
 
 }
+

@@ -8,7 +8,7 @@ import com.elfmcys.yesstevemodel.geckolib3.core.molang.util.StringPool;
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
 import com.elfmcys.yesstevemodel.network.message.C2SRequestSwitchModelPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import rip.ysm.gui.ModernPlayerTextureScreen;
@@ -74,7 +74,7 @@ public final class TextureGrid extends OptionRow<Object> {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         int c = cols();
         int slotW = TEX_BTN_W + TEX_GAP;
         int slotH = TEX_BTN_H + TEX_GAP;
@@ -87,7 +87,7 @@ public final class TextureGrid extends OptionRow<Object> {
         }
     }
 
-    private void renderSlot(GuiGraphics g, int x, int y, int idx, int mx, int my, float pt) {
+    private void renderSlot(GuiGraphicsExtractor g, int x, int y, int idx, int mx, int my, float pt) {
         String name = textureNames.get(idx);
         PlayerPreviewEntity holder = holders[idx];
         String currentTex = currentTextureName();
@@ -115,13 +115,13 @@ public final class TextureGrid extends OptionRow<Object> {
         return PlayerCapability.get(mc.player).map(PlayerCapability::getCurrentTextureName).orElse(StringPool.EMPTY);
     }
 
-    private void renderHolderPreview(GuiGraphics g, int x, int y, PlayerPreviewEntity holder, float pt) {
+    private void renderHolderPreview(GuiGraphicsExtractor g, int x, int y, PlayerPreviewEntity holder, float pt) {
         int previewH = TEX_BTN_H - 20;
         ModelPreviewRenderer.submitLivingEntityPreview(g, x, y, x + TEX_BTN_W, y + previewH, 35, pt, holder, false, true);
     }
 
     @Override
-    protected void renderControl(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    protected void renderControl(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
     }
 
     @Override
@@ -148,3 +148,4 @@ public final class TextureGrid extends OptionRow<Object> {
         });
     }
 }
+

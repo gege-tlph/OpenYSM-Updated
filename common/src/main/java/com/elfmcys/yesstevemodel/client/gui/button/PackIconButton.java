@@ -7,7 +7,7 @@ import com.elfmcys.yesstevemodel.util.FileTypeUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -31,7 +31,7 @@ public class PackIconButton extends Button {
         this.packData = packData;
     }
 
-    public void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
         guiGraphics.fillGradient(getX(), getY(), getX() + this.width, getY() + this.height, -6598176, -6598176);
@@ -58,7 +58,7 @@ public class PackIconButton extends Button {
         }
     }
 
-    public void renderDescription(GuiGraphics guiGraphics, Screen screen, int mouseX, int mouseY) {
+    public void renderDescription(GuiGraphicsExtractor guiGraphics, Screen screen, int mouseX, int mouseY) {
         String str = ModelMetadataPresenter.getLocalizedString(this.packData, "description", this.packData.getDescription());
         if (StringUtils.isBlank(str)) {
             return;
@@ -69,11 +69,12 @@ public class PackIconButton extends Button {
         }
     }
 
-    private static void drawCenteredString(GuiGraphics guiGraphics, Font font, Component component, int centerX, int y, int color) {
+    private static void drawCenteredString(GuiGraphicsExtractor guiGraphics, Font font, Component component, int centerX, int y, int color) {
         guiGraphics.drawString(font, component, centerX - (font.width(component) / 2), y, color, false);
     }
 
-    private static void drawCenteredString(GuiGraphics guiGraphics, Font font, FormattedCharSequence formattedCharSequence, int centerX, int y, int color) {
+    private static void drawCenteredString(GuiGraphicsExtractor guiGraphics, Font font, FormattedCharSequence formattedCharSequence, int centerX, int y, int color) {
         guiGraphics.drawString(font, formattedCharSequence, centerX - (font.width(formattedCharSequence) / 2), y, color, false);
     }
 }
+

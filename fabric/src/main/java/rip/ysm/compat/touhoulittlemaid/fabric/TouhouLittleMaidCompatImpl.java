@@ -11,11 +11,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidAnimationRoulette;
-import rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidBinding;
-import rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidEventHandler;
-import rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidInteractionAnimHandler;
-import rip.ysm.compat.touhoulittlemaid.fabric.tlm.anim.MaidAnimationController;
 
 /**
  * Touhou Little Maid 兼容的 Fabric 平台实现，编译目标 = Tsumugi fork（1.21.11 Fabric，libs/ 内 jar）。
@@ -50,45 +45,38 @@ public final class TouhouLittleMaidCompatImpl {
      * {@code isLoaded()} 为真的分支里被引用，故 TLM 未安装时该类不会被加载。
      */
     public static void initClient() {
-        if (isLoaded()) {
-            rip.ysm.compat.touhoulittlemaid.fabric.tlm.MaidClientSetup.init();
-        }
     }
 
     public static boolean isMaidEntity(Entity entity) {
-        return isLoaded() && MaidEventHandler.isMaid(entity);
+        return false;
     }
 
     public static boolean isMaidRideable(Entity entity) {
-        return isLoaded() && MaidEventHandler.isYsmModelMaid(entity);
+        return false;
     }
 
     public static boolean isSimplePlanesEntity(Entity entity) {
-        return isLoaded() && MaidEventHandler.isChair(entity);
+        return false;
     }
 
     public static boolean isImmersiveAircraftEntity(Entity entity) {
-        return isLoaded() && MaidEventHandler.isSit(entity);
+        return false;
     }
 
     public static boolean isMaidItem(Item item) {
-        return isLoaded() && MaidEventHandler.isGohei(item);
+        return false;
     }
 
     public static String getMaidEntityId(Entity entity) {
-        return isLoaded() ? MaidEventHandler.getChairModelId(entity) : StringPool.EMPTY;
+        return StringPool.EMPTY;
     }
 
     public static boolean isMaidSitting(LivingEntity livingEntity) {
-        return isLoaded() && MaidEventHandler.isMaidFishing(livingEntity);
+        return false;
     }
 
     public static void registerMaidAnimStates(TLMBinding tlmBinding) {
-        if (isLoaded()) {
-            MaidBinding.registerBindings(tlmBinding);
-        } else {
-            registerDummyBindings(tlmBinding);
-        }
+        registerDummyBindings(tlmBinding);
     }
 
     private static void registerDummyBindings(TLMBinding tlmBinding) {
@@ -111,9 +99,6 @@ public final class TouhouLittleMaidCompatImpl {
     }
 
     public static PlayState handleMaidInteraction(AnimationEvent<LivingAnimatable<?>> event, LivingEntity livingEntity, Entity entity) {
-        if (isLoaded()) {
-            return MaidInteractionAnimHandler.handleMaidInteractionAnim(event, livingEntity, entity);
-        }
         return null;
     }
 
@@ -122,22 +107,15 @@ public final class TouhouLittleMaidCompatImpl {
      * 调用方是轮盘快捷键，它先问这里、否则回落玩家轮盘——**判宽了会抢掉玩家的轮盘键**。
      */
     public static boolean isMaidChatAvailable() {
-        return isLoaded() && MaidAnimationRoulette.canOpenRoulette();
+        return false;
     }
 
     /** 实为「打开动画轮盘」，与上一方法必须同批开启 */
     public static void openMaidChat() {
-        if (isLoaded()) {
-            MaidAnimationRoulette.openRouletteScreen();
-        }
     }
 
     public static Object buildControllers(PlayerModelBundle modelBundle, ModelResourceBundle resourceBundle) {
-        if (!isLoaded()) {
-            return null;
-        }
-        // 返回 Object 是 common 侧签名要求（它不能 import 女仆类型）；实际类型是
-        // Consumer<MaidAnimatable>，由 MaidAnimatable.registerAnimationControllers 转型后 accept。
-        return MaidAnimationController.buildControllers(modelBundle, resourceBundle);
+        return null;
     }
 }
+

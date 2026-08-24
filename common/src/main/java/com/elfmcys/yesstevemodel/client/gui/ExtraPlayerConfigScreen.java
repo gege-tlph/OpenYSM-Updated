@@ -53,8 +53,9 @@ public class ExtraPlayerConfigScreen extends OptionScreen {
     }
 
     @Override
-    protected void renderBlurredBackground(net.minecraft.client.gui.GuiGraphics guiGraphics) {
+    protected void renderBlurredBackground(net.minecraft.client.gui.GuiGraphicsExtractor guiGraphics) {
 
     }
 
 }
+
