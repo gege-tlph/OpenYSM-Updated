@@ -11,12 +11,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin({InventoryScreen.class})
 public class InventoryScreenMixin {
-    @Inject(at = {@At("HEAD")}, method = {"renderEntityInInventoryFollowsMouse"}, remap = false)
+    @Inject(at = {@At("HEAD")}, method = {"extractEntityInInventoryFollowsMouse"}, remap = false)
     private static void renderEntityInInventoryFollowsAnglePre(GuiGraphicsExtractor guiGraphics, int i, int j, int k, int l, int m, float f, float g, float h, LivingEntity livingEntity, CallbackInfo ci) {
         ModelPreviewRenderer.setPreviewMode(true);
     }
 
-    @Inject(at = {@At("RETURN")}, method = {"renderEntityInInventoryFollowsMouse"}, remap = false)
+    @Inject(at = {@At("RETURN")}, method = {"extractEntityInInventoryFollowsMouse"}, remap = false)
     private static void renderEntityInInventoryFollowsAnglePost(GuiGraphicsExtractor guiGraphics, int i, int j, int k, int l, int m, float f, float g, float h, LivingEntity livingEntity, CallbackInfo ci) {
         ModelPreviewRenderer.setPreviewMode(false);
     }
