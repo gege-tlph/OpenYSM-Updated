@@ -29,16 +29,18 @@ public class DownloadScreen extends Screen {
         }));
     }
 
-    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, "Coming Soooooooooooooooooooooooooon™", this.width / 2, (this.height / 2) - 5, ChatFormatting.DARK_RED.getColor().intValue() | 0xFF000000);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.centeredText(this.font, "Coming Soooooooooooooooooooooooooon™", this.width / 2, (this.height / 2) - 5, ChatFormatting.DARK_RED.getColor().intValue() | 0xFF000000);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderBlurredBackground(GuiGraphicsExtractor guiGraphics) {
+    protected void extractBlurredBackground(GuiGraphicsExtractor guiGraphics) {
 
     }
 
 }
+
+
 

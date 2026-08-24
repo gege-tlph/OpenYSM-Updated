@@ -30,16 +30,18 @@ public class OpenModelFolderScreen extends Screen {
         }).bounds(x + 160, y, 150, 20).build());
     }
 
-    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawWordWrap(this.font, Component.translatable("gui.yes_steve_model.open_model_folder.tips"), (this.width - 400) / 2, (this.height / 2) - 80, 400, -1);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.textWithWordWrap(this.font, Component.translatable("gui.yes_steve_model.open_model_folder.tips"), (this.width - 400) / 2, (this.height / 2) - 80, 400, -1);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderBlurredBackground(net.minecraft.client.gui.GuiGraphicsExtractor guiGraphics) {
+    protected void extractBlurredBackground(net.minecraft.client.gui.GuiGraphicsExtractor guiGraphics) {
 
     }
 
 }
+
+
 

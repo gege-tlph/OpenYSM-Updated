@@ -19,7 +19,7 @@ public class BooleanOptionRow extends OptionRow<Boolean> {
         boolean hover = isMouseOverControl(mouseX, mouseY);
 
         g.fill(cx, cy, cx + size, cy + size, blendBg(hover, 0xFF1A1A1A));
-        g.renderOutline(cx, cy, size, size, -1);
+        g.outline(cx, cy, size, size, -1);
         if (value) {
             g.fill(cx + 3, cy + 3, cx + size - 3, cy + size - 3, -1);
         }
@@ -32,4 +32,5 @@ public class BooleanOptionRow extends OptionRow<Boolean> {
         }
     }
 }
+
 

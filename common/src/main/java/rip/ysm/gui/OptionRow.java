@@ -23,7 +23,7 @@ public abstract class OptionRow<T> extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         boolean dirty = option != null && option.isDirty();
         int bg = isHovered() ? 0x90171717 : (dirty ? 0x90060606 : 0x90000000);
         g.fill(getX(), getY(), getX() + width, getY() + height, bg);
@@ -31,7 +31,7 @@ public abstract class OptionRow<T> extends AbstractWidget {
         Component label = getMessage();
         int textColor = dirty ? -1 : 0x90FFFFFF;
         int textY = getY() + (height - 8) / 2;
-        g.drawString(Minecraft.getInstance().font, label, getX() + 8, textY, textColor, false);
+        g.text(Minecraft.getInstance().font, label, getX() + 8, textY, textColor, false);
 
         renderControl(g, mouseX, mouseY, partialTick);
     }
@@ -92,4 +92,5 @@ public abstract class OptionRow<T> extends AbstractWidget {
         defaultButtonNarrationText(out);
     }
 }
+
 

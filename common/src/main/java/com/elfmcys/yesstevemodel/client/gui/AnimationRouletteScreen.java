@@ -336,9 +336,9 @@ public class AnimationRouletteScreen extends Screen {
             }
         }) {
             @Override
-            public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+            protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
                 guiGraphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), -280804798);
-                super.renderContents(guiGraphics, mouseX, mouseY, partialTick);
+                super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
             }
         };
         configCheckBox.setStateTriggered(parsedValue > 0.0f);
@@ -360,9 +360,9 @@ public class AnimationRouletteScreen extends Screen {
         return value;
     }
 
-    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         int scrolledMouseY;
-        guiGraphics.drawCenteredString(this.font, Component.translatable("gui.yes_steve_model.roulette.path", StringUtils.joinWith(" > ", navigationStack.stream().map((v0) -> {
+        guiGraphics.centeredText(this.font, Component.translatable("gui.yes_steve_model.roulette.path", StringUtils.joinWith(" > ", navigationStack.stream().map((v0) -> {
             return v0.getLeft();
         }).toArray())), this.centerX + 195, this.centerY - 100, -1);
         renderRadialBackground(guiGraphics, mouseX, mouseY);
@@ -370,7 +370,7 @@ public class AnimationRouletteScreen extends Screen {
         renderPageInfo(guiGraphics);
         for (Renderable renderable : ((ScreenAccessor) this).ysm$getRenderables()) {
             if (!(renderable instanceof ISpecialWidget)) {
-                renderable.render(guiGraphics, mouseX, mouseY, partialTick);
+                renderable.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
             }
         }
         guiGraphics.enableScissor(0, this.centerY - 46, this.width, this.centerY + 110);
@@ -383,7 +383,7 @@ public class AnimationRouletteScreen extends Screen {
         guiGraphics.pose().translate(0.0f, -this.configScrollOffset);
         for (Renderable renderable2 : ((ScreenAccessor) this).ysm$getRenderables()) {
             if (renderable2 instanceof ISpecialWidget) {
-                renderable2.render(guiGraphics, mouseX, scrolledMouseY, partialTick);
+                renderable2.extractRenderState(guiGraphics, mouseX, scrolledMouseY, partialTick);
             }
         }
         guiGraphics.pose().popMatrix();
@@ -410,7 +410,7 @@ public class AnimationRouletteScreen extends Screen {
 
     private void renderPageInfo(GuiGraphicsExtractor guiGraphics) {
         guiGraphics.fill(this.centerX + 157, this.centerY - 87, this.centerX + 238, this.centerY - 72, -822083584);
-        guiGraphics.drawCenteredString(this.font, String.format("%d/%d", Integer.valueOf(this.currentNavEntry.getRight().intValue() + 1), Integer.valueOf(((this.currentProperties.size() - 1) / 8) + 1)), this.centerX + 197, this.centerY - 83, ChatFormatting.AQUA.getColor().intValue() | 0xFF000000);
+        guiGraphics.centeredText(this.font, String.format("%d/%d", Integer.valueOf(this.currentNavEntry.getRight().intValue() + 1), Integer.valueOf(((this.currentProperties.size() - 1) / 8) + 1)), this.centerX + 197, this.centerY - 83, ChatFormatting.AQUA.getColor().intValue() | 0xFF000000);
     }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
@@ -529,7 +529,7 @@ public class AnimationRouletteScreen extends Screen {
             });
         }
         if (localPlayer != null && GeneralConfig.PRINT_ANIMATION_ROULETTE_MSG.get().booleanValue()) {
-            localPlayer.displayClientMessage(Component.translatable("message.yes_steve_model.model.animation_roulette.play", str), false);
+            localPlayer.sendSystemMessage(Component.translatable("message.yes_steve_model.model.animation_roulette.play", str));
         }
         Minecraft.getInstance().setScreen(null);
     }
@@ -538,7 +538,7 @@ public class AnimationRouletteScreen extends Screen {
         if (navigationStack.size() > 5) {
             LocalPlayer localPlayer = Minecraft.getInstance().player;
             if (localPlayer != null) {
-                localPlayer.displayClientMessage(Component.translatable("gui.yes_steve_model.roulette.too_long"), false);
+                localPlayer.sendSystemMessage(Component.translatable("gui.yes_steve_model.roulette.too_long"));
                 return;
             }
             return;
@@ -587,13 +587,13 @@ public class AnimationRouletteScreen extends Screen {
                     int iCos2 = (int) (this.centerX + (35 * Mth.cos(angle)));
                     float fSin2 = this.centerY + (35 * Mth.sin(angle));
                     Objects.requireNonNull(this.font);
-                    guiGraphics.drawCenteredString(this.font, Component.literal("⚙").withStyle(ChatFormatting.BOLD, ChatFormatting.GOLD), iCos2, (int) (fSin2 - (9.0f / 2.0f)), -1);
+                    guiGraphics.centeredText(this.font, Component.literal("⚙").withStyle(ChatFormatting.BOLD, ChatFormatting.GOLD), iCos2, (int) (fSin2 - (9.0f / 2.0f)), -1);
                 }
             }
             if (StringUtils.isNoneBlank(str)) {
                 renderWrappedLabel(guiGraphics, Component.literal(ModelMetadataPresenter.getLocalizedModelString(this.renderContext, "properties.extra_animation.%s".formatted(this.currentProperties.getKeyAt(iIntValue)), str)), iCos, labelY, zStartsWith);
             } else {
-                guiGraphics.drawCenteredString(this.font, Component.literal(ModelMetadataPresenter.getLocalizedModelString(this.renderContext, "properties.extra_animation.%s".formatted(this.currentProperties.getKeyAt(iIntValue)), String.valueOf(iIntValue))), iCos, labelY - 8, 0xFFF3F0E0);
+                guiGraphics.centeredText(this.font, Component.literal(ModelMetadataPresenter.getLocalizedModelString(this.renderContext, "properties.extra_animation.%s".formatted(this.currentProperties.getKeyAt(iIntValue)), String.valueOf(iIntValue))), iCos, labelY - 8, 0xFFF3F0E0);
             }
             if (this.currentNavEntry.getRight().intValue() == 0 && navigationStack.size() == 1) {
                 renderKeyBindings(guiGraphics, iIntValue, iCos, labelY);
@@ -611,7 +611,7 @@ public class AnimationRouletteScreen extends Screen {
             mutableComponentWithStyle.append(keyMapping.getTranslatedKeyMessage());
         }
         mutableComponentWithStyle.append(" ]");
-        guiGraphics.drawCenteredString(this.font, mutableComponentWithStyle, x, y + 4, 0xFFF3F0E0);
+        guiGraphics.centeredText(this.font, mutableComponentWithStyle, x, y + 4, 0xFFF3F0E0);
     }
 
     private void renderWrappedLabel(GuiGraphicsExtractor guiGraphics, MutableComponent mutableComponent, int x, int y, boolean isSubmenu) {
@@ -626,7 +626,7 @@ public class AnimationRouletteScreen extends Screen {
         }
         Iterator it = listSplit.iterator();
         while (it.hasNext()) {
-            guiGraphics.drawCenteredString(this.font, (FormattedCharSequence) it.next(), x, lineY, 0xFFF3F0E0);
+            guiGraphics.centeredText(this.font, (FormattedCharSequence) it.next(), x, lineY, 0xFFF3F0E0);
             lineY += 9;
         }
     }
@@ -712,4 +712,8 @@ public class AnimationRouletteScreen extends Screen {
     }
 
 }
+
+
+
+
 

@@ -22,8 +22,8 @@ public class ModIconButton extends FlatColorButton {
     }
 
     @Override
-    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderContents(guiGraphics, mouseX, mouseY, partialTick);
+    protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
         int iconOffsetX = (this.width - 16) / 2;
         int iconOffsetY = (this.height - 16) / 2;
         LocalPlayer localPlayer = Minecraft.getInstance().player;
@@ -59,4 +59,6 @@ public class ModIconButton extends FlatColorButton {
         }
     }
 }
+
+
 

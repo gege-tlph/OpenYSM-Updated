@@ -68,37 +68,37 @@ public class ExtraPlayerRenderScreen extends Screen {
                 .build());
     }
 
-    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         int boxLeft = this.mouseStartX;
         int boxTop = this.mouseStartY;
         int boxRight = (int) (boxLeft + (this.rotationX));
         int boxBottom = (int) (boxTop + (this.rotationX * 2.0f));
-        guiGraphics.vLine((this.width / 2) - 1, -2, this.height + 2, -1610612737);
-        guiGraphics.hLine(-2, this.width + 2, (this.height / 2) - 1, -1610612737);
-        guiGraphics.vLine(10, -2, this.height + 2, -1610612737);
-        guiGraphics.vLine(this.width - 10, -2, this.height + 2, -1610612737);
-        guiGraphics.hLine(-2, this.width + 2, 10, -1610612737);
-        guiGraphics.hLine(-2, this.width + 2, this.height - 10, -1610612737);
-        guiGraphics.vLine(boxLeft, boxTop, boxBottom, -65536);
-        guiGraphics.vLine(boxRight, boxTop, boxBottom, -65536);
-        guiGraphics.hLine(boxLeft, boxRight, boxTop, -65536);
-        guiGraphics.hLine(boxLeft, boxRight, boxBottom, -65536);
+        guiGraphics.verticalLine((this.width / 2) - 1, -2, this.height + 2, -1610612737);
+        guiGraphics.horizontalLine(-2, this.width + 2, (this.height / 2) - 1, -1610612737);
+        guiGraphics.verticalLine(10, -2, this.height + 2, -1610612737);
+        guiGraphics.verticalLine(this.width - 10, -2, this.height + 2, -1610612737);
+        guiGraphics.horizontalLine(-2, this.width + 2, 10, -1610612737);
+        guiGraphics.horizontalLine(-2, this.width + 2, this.height - 10, -1610612737);
+        guiGraphics.verticalLine(boxLeft, boxTop, boxBottom, -65536);
+        guiGraphics.verticalLine(boxRight, boxTop, boxBottom, -65536);
+        guiGraphics.horizontalLine(boxLeft, boxRight, boxTop, -65536);
+        guiGraphics.horizontalLine(boxLeft, boxRight, boxBottom, -65536);
         guiGraphics.fillGradient(boxLeft, boxTop, boxRight, boxBottom, 1342177279, 1342177279);
         guiGraphics.fillGradient(boxLeft - this.offsetX, boxTop - this.offsetX, boxLeft + this.offsetX, boxTop + this.offsetX, -16711777, -16711777);
         guiGraphics.fillGradient(boxRight - this.offsetX, boxBottom - this.offsetX, boxRight + this.offsetX, boxBottom + this.offsetX, -16777057, -16777057);
         int tipY = 15;
         for (FormattedCharSequence formattedCharSequence : this.font.split(Component.translatable("gui.yes_steve_model.extra_player_render.tips"), 500)) {
-            guiGraphics.drawString(this.font, formattedCharSequence, (this.width - 15) - this.font.width(formattedCharSequence), tipY, -1);
+            guiGraphics.text(this.font, formattedCharSequence, (this.width - 15) - this.font.width(formattedCharSequence), tipY, -1);
             tipY += 10;
         }
         if (Minecraft.getInstance().player != null && !ExtraPlayerRenderConfig.DISABLE_PLAYER_RENDER.get().booleanValue()) {
             ModelPreviewRenderer.submitPlayerOverlay(guiGraphics, Minecraft.getInstance().player, this.mouseStartX, this.mouseStartY, this.rotationX, this.rotationY, this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false));
         }
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderBlurredBackground(net.minecraft.client.gui.GuiGraphicsExtractor guiGraphics) {
+    protected void extractBlurredBackground(net.minecraft.client.gui.GuiGraphicsExtractor guiGraphics) {
 
     }
 
@@ -170,4 +170,6 @@ public class ExtraPlayerRenderScreen extends Screen {
     }
 
 }
+
+
 

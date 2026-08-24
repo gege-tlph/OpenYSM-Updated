@@ -23,14 +23,14 @@ public class CacheCommand {
             return 0;
         }
 
-        player.displayClientMessage(YSMMessageFormatter.withPrefix(Component.literal("开始解析并导出客户端缓存模型...")), false);
+        player.sendSystemMessage(YSMMessageFormatter.withPrefix(Component.literal("开始解析并导出客户端缓存模型...")));
 
         ClientModelManager.exportAllCachedModels(null, exportResult -> {
             if (exportResult.getMessage() != null) {
-                player.displayClientMessage(YSMMessageFormatter.withPrefix(exportResult.getMessage()), false);
+                player.sendSystemMessage(YSMMessageFormatter.withPrefix(exportResult.getMessage()));
             }
             if (exportResult.isSuccess()) {
-                player.displayClientMessage(Component.translatable("commands.yes_steve_model.export.success", exportResult.getFilePath()), false);
+                player.sendSystemMessage(Component.translatable("commands.yes_steve_model.export.success", exportResult.getFilePath()));
             }
         });
 

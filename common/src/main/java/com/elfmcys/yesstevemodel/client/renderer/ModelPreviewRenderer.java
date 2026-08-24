@@ -394,7 +394,7 @@ public final class ModelPreviewRenderer {
         CustomPlayerRenderer renderer = RendererManager.getPlayerRenderer();
         AvatarRenderState state = new AvatarRenderState();
         renderer.extractRenderState((Player) entity, state, partialTick);
-        state.lightCoords = net.minecraft.client.renderer.LightTexture.FULL_BRIGHT;
+        state.lightCoords = 15728880;
 
         float previewYaw = disablePreviewRotation ? 180.0F : 200.0F;
         state.bodyRot = previewYaw;
@@ -455,7 +455,7 @@ public final class ModelPreviewRenderer {
         CustomPlayerRenderer renderer = RendererManager.getPlayerRenderer();
         AvatarRenderState state = new AvatarRenderState();
         renderer.extractRenderState(localPlayer, state, partialTick);
-        state.lightCoords = net.minecraft.client.renderer.LightTexture.FULL_BRIGHT;
+        state.lightCoords = 15728880;
         PreviewEntityRegistry.register(state, cap);
 
         state.bodyRot = 180.0F;
@@ -515,7 +515,7 @@ public final class ModelPreviewRenderer {
         CustomPlayerRenderer renderer = RendererManager.getPlayerRenderer();
         AvatarRenderState state = new AvatarRenderState();
         renderer.extractRenderState((Player) entity, state, partialTick);
-        state.lightCoords = net.minecraft.client.renderer.LightTexture.FULL_BRIGHT;
+        state.lightCoords = 15728880;
 
         state.bodyRot = -yaw;
         state.yRot = Mth.wrapDegrees(180.0F + yaw);
@@ -694,4 +694,5 @@ public final class ModelPreviewRenderer {
         poseStack.popPose();
     }
 }
+
 

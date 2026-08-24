@@ -90,11 +90,12 @@ public class MaidModelScreen extends PlayerModelScreen {
 
             int lineY = this.guiTop + 205;
             for (FormattedCharSequence line : lines) {
-                guiGraphics.drawString(this.font, line,
+                guiGraphics.text(this.font, line,
                         this.guiLeft + ((135 - this.font.width(line)) / 2), lineY, 15986656);
                 lineY += 10;
             }
         }
     }
 }
+
 

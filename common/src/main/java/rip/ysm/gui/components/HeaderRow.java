@@ -15,13 +15,14 @@ public final class HeaderRow extends OptionRow<Object> {
     }
 
     @Override
-    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         g.fill(getX(), getY(), getX() + width, getY() + height, 0x90000000);
-        g.drawString(Minecraft.getInstance().font, Component.literal(text).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), getX() + 8, getY() + (height - 8) / 2, -1, false);
+        g.text(Minecraft.getInstance().font, Component.literal(text).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), getX() + 8, getY() + (height - 8) / 2, -1, false);
     }
 
     @Override
     protected void renderControl(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
     }
 }
+
 

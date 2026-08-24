@@ -152,7 +152,7 @@ public class ModelButton extends Button {
         }
     }
 
-    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         AnimationTracker c0117x8455a741Mo1262xaffeef43 = this.modelIdHolder.getAnimationStateMachine();
         if (isHovered()) {
             this.lastHoverTime = Util.getMillis();
@@ -196,10 +196,10 @@ public class ModelButton extends Button {
 
         List listSplit = font.split(getMessage(), 45);
         if (listSplit.size() > 1) {
-            guiGraphics.drawCenteredString(font, (FormattedCharSequence) listSplit.get(0), x + (this.width / 2), (y + this.height) - 19, 0xFFF3F0E0);
-            guiGraphics.drawCenteredString(font, (FormattedCharSequence) listSplit.get(1), x + (this.width / 2), (y + this.height) - 10, 0xFFF3F0E0);
+            guiGraphics.centeredText(font, (FormattedCharSequence) listSplit.get(0), x + (this.width / 2), (y + this.height) - 19, 0xFFF3F0E0);
+            guiGraphics.centeredText(font, (FormattedCharSequence) listSplit.get(1), x + (this.width / 2), (y + this.height) - 10, 0xFFF3F0E0);
         } else {
-            guiGraphics.drawCenteredString(font, getMessage(), x + (this.width / 2), (y + this.height) - 15, 0xFFF3F0E0);
+            guiGraphics.centeredText(font, getMessage(), x + (this.width / 2), (y + this.height) - 15, 0xFFF3F0E0);
         }
 
         if (!this.isStarred && isHoveredOrFocused()) {
@@ -248,4 +248,5 @@ public class ModelButton extends Button {
         return !this.isStarred && this.active && this.visible && this.isMouseOver(mouseX, mouseY);
     }
 }
+
 

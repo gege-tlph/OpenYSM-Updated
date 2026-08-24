@@ -268,11 +268,11 @@ public abstract class OptionScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         renderPanelBackdrop(g);
 
         g.fill(panelLeft, panelTop, panelRight, panelTop + 18, 0x90000000);
-        g.drawString(this.font, this.title, panelLeft + 6, panelTop + 5, 0xFFFFFFFF, false);
+        g.text(this.font, this.title, panelLeft + 6, panelTop + 5, 0xFFFFFFFF, false);
 
         long now = System.nanoTime();
         if (lastFrameNanos == 0L) lastFrameNanos = now;
@@ -303,7 +303,7 @@ public abstract class OptionScreen extends Screen {
         applyBtn.active = dirty;
         undoBtn.active = activeGroup != null && activeGroup.isDirty();
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
 
         if (!tabButtons.isEmpty()) {
             boolean inTabArea = mouseX >= tabAreaLeft && mouseX < tabAreaRight && mouseY >= tabAreaTop && mouseY < tabAreaBottom;
@@ -319,7 +319,7 @@ public abstract class OptionScreen extends Screen {
             if (compactTabs) g.pose().translate(-tabScrollDisplay, 0);
             else g.pose().translate(0, -tabScrollDisplay);
             for (TabButton tb : tabButtons) {
-                tb.render(g, adjTabMouseX, adjTabMouseY, partialTick);
+                tb.extractRenderState(g, adjTabMouseX, adjTabMouseY, partialTick);
             }
             g.pose().popMatrix();
             g.disableScissor();
@@ -330,7 +330,7 @@ public abstract class OptionScreen extends Screen {
         g.pose().pushMatrix();
         g.pose().translate(0, -rowScrollDisplay);
         for (OptionRow<?> row : activeRows) {
-            row.render(g, mouseX, adjMouseY, partialTick);
+            row.extractRenderState(g, mouseX, adjMouseY, partialTick);
         }
         g.pose().popMatrix();
         g.disableScissor();
@@ -440,7 +440,7 @@ public abstract class OptionScreen extends Screen {
         g.fill(panelLeft, descY, panelRight, descY + 28, 0x80000000);
         Option<?> opt = hoveredRow.getOption();
         Component title = opt.getLabel();
-        g.drawString(this.font, title, panelLeft + 6, descY + 4, -1, false);
+        g.text(this.font, title, panelLeft + 6, descY + 4, -1, false);
 
         Component desc = opt.getDescription();
         int maxWidth = panelRight - panelLeft - 6 * 2;
@@ -448,7 +448,7 @@ public abstract class OptionScreen extends Screen {
         int lineY = descY + 16;
         int max = Math.min(lines.size(), (28 - 16) / 10);
         for (int i = 0; i < max; i++) {
-            g.drawString(this.font, lines.get(i), panelLeft + 6, lineY, 0xFFCCCCCC, false);
+            g.text(this.font, lines.get(i), panelLeft + 6, lineY, 0xFFCCCCCC, false);
             lineY += 10;
         }
     }
@@ -598,4 +598,6 @@ public abstract class OptionScreen extends Screen {
         return false;
     }
 }
+
+
 

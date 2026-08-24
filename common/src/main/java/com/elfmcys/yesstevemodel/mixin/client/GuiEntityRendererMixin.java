@@ -8,7 +8,7 @@ import com.elfmcys.yesstevemodel.client.renderer.RendererManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.render.pip.GuiEntityRenderer;
-import net.minecraft.client.gui.render.state.pip.GuiEntityRenderState;
+import net.minecraft.client.renderer.state.gui.pip.GuiEntityRenderState;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -81,4 +81,5 @@ public class GuiEntityRendererMixin {
         dispatcher.submit(state, cameraState, x, y, z, poseStack, collector);
     }
 }
+
 

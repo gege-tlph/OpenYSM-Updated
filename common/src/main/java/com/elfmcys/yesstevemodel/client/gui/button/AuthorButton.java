@@ -56,11 +56,11 @@ public class AuthorButton extends Button {
         return new AuthorButton(x, y, null, null, null, -1, screen);
     }
 
-    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         Font font = Minecraft.getInstance().font;
         if (this.authorInfo == null || this.modelAssembly == null || this.Identifier == null) {
             guiGraphics.fillGradient(getX(), getY(), getX() + this.width, getY() + this.height, -1891417534, -1891417534);
-            guiGraphics.drawCenteredString(font, Component.literal("......"), getX() + (this.width / 2), getY() + (this.height / 2), ChatFormatting.GRAY.getColor().intValue() | 0xFF000000);
+            guiGraphics.centeredText(font, Component.literal("......"), getX() + (this.width / 2), getY() + (this.height / 2), ChatFormatting.GRAY.getColor().intValue() | 0xFF000000);
             return;
         }
         if (isHoveredOrFocused()) {
@@ -72,15 +72,15 @@ public class AuthorButton extends Button {
         String str = ModelMetadataPresenter.getLocalizedModelString(this.modelAssembly, "metadata.authors.%d.name".formatted(this.authorIndex), this.authorInfo.getName());
         String str2 = ModelMetadataPresenter.getLocalizedModelString(this.modelAssembly, "metadata.authors.%d.role".formatted(this.authorIndex), this.authorInfo.getRole());
         String str3 = ModelMetadataPresenter.getLocalizedModelString(this.modelAssembly, "metadata.authors.%d.comment".formatted(this.authorIndex), this.authorInfo.getComment());
-        guiGraphics.drawString(font, str, getX() + 2, getY() + 72, ChatFormatting.GOLD.getColor().intValue() | 0xFF000000, false);
-        guiGraphics.drawCenteredString(font, str2, getX() + 35, getY() + 82, ChatFormatting.GREEN.getColor().intValue() | 0xFF000000);
+        guiGraphics.text(font, str, getX() + 2, getY() + 72, ChatFormatting.GOLD.getColor().intValue() | 0xFF000000, false);
+        guiGraphics.centeredText(font, str2, getX() + 35, getY() + 82, ChatFormatting.GREEN.getColor().intValue() | 0xFF000000);
         drawWrappedText(guiGraphics, Component.literal(str3), getX() + 3, getY() + 95, 64, -1);
     }
 
     public void drawWrappedText(GuiGraphicsExtractor guiGraphics, FormattedText formattedText, int x, int y, int wrapWidth, int color) {
         Font font = Minecraft.getInstance().font;
         for (FormattedCharSequence formattedCharSequence : font.split(formattedText, wrapWidth)) {
-            guiGraphics.drawString(font, formattedCharSequence, x, y, color, false);
+            guiGraphics.text(font, formattedCharSequence, x, y, color, false);
             y += 9;
             if (y > getY() + this.height) {
                 return;
@@ -163,4 +163,5 @@ public class AuthorButton extends Button {
         renderTooltip(true);
     }
 }
+
 

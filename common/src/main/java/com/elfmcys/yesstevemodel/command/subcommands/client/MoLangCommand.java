@@ -113,7 +113,7 @@ public class MoLangCommand {
                 geoEntity = PlayerCapability.get(Minecraft.getInstance().player).orElse(null);
             }
             if (geoEntity != null) {
-                geoEntity.executeExpression(value, true, false, str -> Minecraft.getInstance().player.displayClientMessage(Component.translatable("message.yes_steve_model.model.debug_animation.result", str), false));
+                geoEntity.executeExpression(value, true, false, str -> Minecraft.getInstance().player.sendSystemMessage(Component.translatable("message.yes_steve_model.model.debug_animation.result", str)));
             }
             return Command.SINGLE_SUCCESS;
         } catch (ParseException e) {

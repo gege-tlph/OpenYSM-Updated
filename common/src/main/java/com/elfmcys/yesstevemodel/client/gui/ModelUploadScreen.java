@@ -89,7 +89,7 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
     }
 
     @Override
-    public void render(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         g.fill(0, 0, this.width, this.height, 0xC0000000);
 
         long sinceFlash = Util.getMillis() - this.lastFlashTime;
@@ -116,10 +116,10 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
         if (!this.error.isEmpty()) {
             MutableComponent err = Component.literal(this.error).withStyle(ChatFormatting.RED);
             int w = this.font.width(err);
-            g.drawString(this.font, err, (this.width - w) / 2, this.height - 60, 0xFFFFFFFF);
+            g.text(this.font, err, (this.width - w) / 2, this.height - 60, 0xFFFFFFFF);
         }
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     private void renderEmptyState(GuiGraphicsExtractor guiGraphics) {
@@ -131,14 +131,14 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
         guiGraphics.pose().translate(cx, cy - 14);
         guiGraphics.pose().scale(2.0f, 2.0f);
         int mw = this.font.width(main);
-        guiGraphics.drawString(this.font, main, -mw / 2, 0, 0xFFFFFFFF);
+        guiGraphics.text(this.font, main, -mw / 2, 0, 0xFFFFFFFF);
         guiGraphics.pose().popMatrix();
         int sw = this.font.width(sub);
-        guiGraphics.drawString(this.font, sub, cx - sw / 2, cy + 22, 0xFFAAAAAA);
+        guiGraphics.text(this.font, sub, cx - sw / 2, cy + 22, 0xFFAAAAAA);
         if (ModelUploadSession.hasServerLimits()) {
             MutableComponent limit = Component.literal("Size limit: " + ModelUploadSession.formatBytes(ModelUploadSession.getLastMaxTotalBytes())).withStyle(ChatFormatting.DARK_GRAY);
             int lw = this.font.width(limit);
-            guiGraphics.drawString(this.font, limit, cx - lw / 2, cy + 36, 0xFFFFFFFF);
+            guiGraphics.text(this.font, limit, cx - lw / 2, cy + 36, 0xFFFFFFFF);
         }
     }
 
@@ -152,11 +152,11 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
         };
         Component title = Component.literal(session.getMessage()).withStyle(color);
         int tw = this.font.width(title);
-        guiGraphics.drawString(this.font, title, cx - tw / 2, cy - 32, 0xFFFFFFFF);
+        guiGraphics.text(this.font, title, cx - tw / 2, cy - 32, 0xFFFFFFFF);
 
         Component sub = Component.literal(session.getModelId()).withStyle(ChatFormatting.GRAY);
         int sw = this.font.width(sub);
-        guiGraphics.drawString(this.font, sub, cx - sw / 2, cy - 16, 0xFFFFFFFF);
+        guiGraphics.text(this.font, sub, cx - sw / 2, cy - 16, 0xFFFFFFFF);
 
         int barW = 320;
         int barH = 14;
@@ -203,7 +203,7 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
 
         String stat = ModelUploadSession.formatBytes(session.getSentBytes()) + " / " + ModelUploadSession.formatBytes(session.getTotalBytes());
         int statW = this.font.width(stat);
-        guiGraphics.drawString(this.font, stat, cx - statW / 2, barY + barH + 6, 0xFFAAAAAA);
+        guiGraphics.text(this.font, stat, cx - statW / 2, barY + barH + 6, 0xFFAAAAAA);
     }
 
     @Override
@@ -216,4 +216,6 @@ public class ModelUploadScreen extends Screen implements ModelUploadSession.List
         Minecraft.getInstance().setScreen(this.parentScreen);
     }
 }
+
+
 

@@ -74,7 +74,7 @@ public final class TextureGrid extends OptionRow<Object> {
     }
 
     @Override
-    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         int c = cols();
         int slotW = TEX_BTN_W + TEX_GAP;
         int slotH = TEX_BTN_H + TEX_GAP;
@@ -99,7 +99,7 @@ public final class TextureGrid extends OptionRow<Object> {
         Component label = Component.literal(ModelMetadataPresenter.getLocalizedModelString(owner.renderContext, "files.player.texture.%s".formatted(name), name));
         int textY = y + TEX_BTN_H - 12;
         int tw = Minecraft.getInstance().font.width(label);
-        g.drawString(Minecraft.getInstance().font, label, x + (TEX_BTN_W - tw) / 2, textY, 0xFFFFFFFF, true);
+        g.text(Minecraft.getInstance().font, label, x + (TEX_BTN_W - tw) / 2, textY, 0xFFFFFFFF, true);
         if (selected || hover) {
             int border = selected ? 0xFFFFFFFF : 0xFFAAAAAA;
             g.fill(x, y, x + TEX_BTN_W, y + 1, border);
@@ -148,4 +148,5 @@ public final class TextureGrid extends OptionRow<Object> {
         });
     }
 }
+
 

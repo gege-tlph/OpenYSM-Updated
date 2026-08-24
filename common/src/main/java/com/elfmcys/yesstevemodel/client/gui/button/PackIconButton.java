@@ -31,7 +31,7 @@ public class PackIconButton extends Button {
         this.packData = packData;
     }
 
-    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
         guiGraphics.fillGradient(getX(), getY(), getX() + this.width, getY() + this.height, -6598176, -6598176);
@@ -70,11 +70,12 @@ public class PackIconButton extends Button {
     }
 
     private static void drawCenteredString(GuiGraphicsExtractor guiGraphics, Font font, Component component, int centerX, int y, int color) {
-        guiGraphics.drawString(font, component, centerX - (font.width(component) / 2), y, color, false);
+        guiGraphics.text(font, component, centerX - (font.width(component) / 2), y, color, false);
     }
 
     private static void drawCenteredString(GuiGraphicsExtractor guiGraphics, Font font, FormattedCharSequence formattedCharSequence, int centerX, int y, int color) {
-        guiGraphics.drawString(font, formattedCharSequence, centerX - (font.width(formattedCharSequence) / 2), y, color, false);
+        guiGraphics.text(font, formattedCharSequence, centerX - (font.width(formattedCharSequence) / 2), y, color, false);
     }
 }
+
 

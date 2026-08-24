@@ -49,7 +49,7 @@ public class ReplacePlayerRenderEvent {
                     RenderContext.enter(collector, cameraState);
                     try {
                         int packedLight = ModelPreviewRenderer.isPreview()
-                                ? net.minecraft.client.renderer.LightTexture.FULL_BRIGHT
+                                ? 15728880
                                 : renderState.lightCoords;
                         RendererManager.getPlayerRenderer().render(entity, renderState, entity.getYRot(), ModelPreviewRenderer.isPreview() ? 1.0f : partialTick, poseStack, bufferSource, packedLight);
                         if (OculusCompat.isRenderingShadowPass()) {
@@ -64,4 +64,5 @@ public class ReplacePlayerRenderEvent {
         return cancelled[0];
     }
 }
+
 

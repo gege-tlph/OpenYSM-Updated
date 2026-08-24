@@ -47,16 +47,18 @@ public class DisclaimerScreen extends Screen {
         }).size(300, 20).pos((this.width - 300) / 2, (this.textHeight + i) - 20).build());
     }
 
-    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawWordWrap(this.font, Component.translatable("gui.yes_steve_model.disclaimer.text"), this.textY, this.textHeight, 400, -1);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(guiGraphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.textWithWordWrap(this.font, Component.translatable("gui.yes_steve_model.disclaimer.text"), this.textY, this.textHeight, 400, -1);
     }
 
     @Override
-    protected void renderBlurredBackground(net.minecraft.client.gui.GuiGraphicsExtractor guiGraphics) {
+    protected void extractBlurredBackground(net.minecraft.client.gui.GuiGraphicsExtractor guiGraphics) {
 
     }
 
 }
+
+
 

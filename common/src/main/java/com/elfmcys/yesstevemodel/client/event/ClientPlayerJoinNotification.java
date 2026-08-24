@@ -40,7 +40,7 @@ public final class ClientPlayerJoinNotification {
                 Minecraft.getInstance().execute(() -> {
                     LocalPlayer localPlayer = Minecraft.getInstance().player;
                     if (localPlayer != null && localPlayer.connection.isAcceptingMessages() && !NetworkHandler.isConnectionValid(localPlayer.connection.getConnection())) {
-                        localPlayer.displayClientMessage(Component.translatable("message.yes_steve_model.client.server_not_found"), false);
+                        localPlayer.sendSystemMessage(Component.translatable("message.yes_steve_model.client.server_not_found"));
                     }
                 });
             } catch (InterruptedException ignored) {

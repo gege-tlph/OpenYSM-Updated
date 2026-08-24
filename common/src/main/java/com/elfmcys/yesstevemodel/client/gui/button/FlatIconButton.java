@@ -20,13 +20,14 @@ public class FlatIconButton extends AbstractWidget implements ISpecialWidget {
         this.iconIndex = iconIndex;
     }
 
-    public void renderWidget(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         guiGraphics.fill(getX(), getY(), getX() + getWidth(), getY() + this.iconIndex, -280804798);
-        renderScrollingStringOverContents(guiGraphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE), getMessage(), 2);
+        extractScrollingStringOverContents(guiGraphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE), getMessage(), 2);
     }
 
     public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
         defaultButtonNarrationText(narrationElementOutput);
     }
 }
+
 

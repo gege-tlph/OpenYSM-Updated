@@ -148,7 +148,7 @@ public class NativeModelRenderer {
             localBoneMat.normal(localNormalMat);
             globalNormalMat.set(rootNormalMC).mul(localNormalMat);
 
-            int currentPackedLight = bone.glow ? LightTexture.pack(15, 15) : packedLight;
+            int currentPackedLight = bone.glow ? 15728880 : packedLight;
 
             for (GeoModel.BakedCube cube : bone.cubes) {
                 for (GeoModel.BakedQuad quad : cube.quads) {

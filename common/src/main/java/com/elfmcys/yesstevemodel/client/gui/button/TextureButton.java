@@ -47,7 +47,7 @@ public class TextureButton extends Button {
         }
     }
 
-    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
         guiGraphics.fillGradient(getX(), getY(), getX() + this.width, getY() + this.height, -12369342, -12369342);
@@ -56,10 +56,10 @@ public class TextureButton extends Button {
         MutableComponent mutableComponentLiteral = Component.literal(ModelMetadataPresenter.getLocalizedModelString(this.modelAssembly, "files.player.texture.%s".formatted(str), str));
         List listSplit = font.split(mutableComponentLiteral, 50);
         if (listSplit.size() > 1) {
-            guiGraphics.drawCenteredString(font, (FormattedCharSequence) listSplit.get(0), getX() + (this.width / 2), (getY() + this.height) - 19, 0xFFF3F0E0);
-            guiGraphics.drawCenteredString(font, (FormattedCharSequence) listSplit.get(1), getX() + (this.width / 2), (getY() + this.height) - 10, 0xFFF3F0E0);
+            guiGraphics.centeredText(font, (FormattedCharSequence) listSplit.get(0), getX() + (this.width / 2), (getY() + this.height) - 19, 0xFFF3F0E0);
+            guiGraphics.centeredText(font, (FormattedCharSequence) listSplit.get(1), getX() + (this.width / 2), (getY() + this.height) - 10, 0xFFF3F0E0);
         } else {
-            guiGraphics.drawCenteredString(font, mutableComponentLiteral, getX() + (this.width / 2), (getY() + this.height) - 15, 0xFFF3F0E0);
+            guiGraphics.centeredText(font, mutableComponentLiteral, getX() + (this.width / 2), (getY() + this.height) - 15, 0xFFF3F0E0);
         }
         if (isHoveredOrFocused()) {
             guiGraphics.fillGradient(getX(), getY() + 1, getX() + 1, (getY() + this.height) - 1, -790560, -790560);
@@ -81,4 +81,5 @@ public class TextureButton extends Button {
         );
     }
 }
+
 

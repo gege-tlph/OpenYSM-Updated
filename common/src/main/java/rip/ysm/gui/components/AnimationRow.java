@@ -26,13 +26,13 @@ public final class AnimationRow extends OptionRow<Object> {
     }
 
     @Override
-    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         boolean selected = animKey.equals(owner.currentAnimation());
         int bg = selected ? 0x90333333 : (isHovered() ? 0x90171717 : 0x90000000);
         g.fill(getX(), getY(), getX() + width, getY() + height, bg);
         if (selected) g.fill(getX(), getY(), getX() + 2, getY() + height, -1);
         int textY = getY() + (height - 8) / 2;
-        g.drawString(Minecraft.getInstance().font, getMessage(), getX() + 8, textY, -1, false);
+        g.text(Minecraft.getInstance().font, getMessage(), getX() + 8, textY, -1, false);
     }
 
     @Override
@@ -44,4 +44,5 @@ public final class AnimationRow extends OptionRow<Object> {
         owner.selectAnimation(animKey);
     }
 }
+
 

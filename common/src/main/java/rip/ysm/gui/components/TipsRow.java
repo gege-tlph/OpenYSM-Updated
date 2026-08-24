@@ -36,13 +36,13 @@ public final class TipsRow extends OptionRow<Object> {
     }
 
     @Override
-    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         recomputeLines();
         g.fill(getX(), getY(), getX() + width, getY() + height, 0x90000000);
         Font font = Minecraft.getInstance().font;
         int y = getY() + 4;
         for (FormattedCharSequence line : cachedLines) {
-            g.drawString(font, line, getX() + 8, y, 0xFFEEEEEE, false);
+            g.text(font, line, getX() + 8, y, 0xFFEEEEEE, false);
             y += 10;
         }
     }
@@ -51,4 +51,5 @@ public final class TipsRow extends OptionRow<Object> {
     protected void renderControl(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
     }
 }
+
 

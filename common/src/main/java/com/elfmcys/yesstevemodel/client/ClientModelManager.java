@@ -143,7 +143,7 @@ public class ClientModelManager {
                 ClientModelInfo parsedBundle = YSMClientMapper.buildParsedBundle(rawModel, "default");
 
 
-                onModelDataReceived(parsedBundle, "default", true, false);
+                onModelDataReceived(parsedBundle, "default", true);
                 YesSteveModel.LOGGER.info("[YSM] Successfully pushed Default Model to render queue.");
             } catch (Exception e) {
                 YesSteveModel.LOGGER.error("[YSM] Failed to dispatch Default Model", e);
@@ -383,7 +383,7 @@ public class ClientModelManager {
                 outBuf.writeVarLong(h.hash2);
             }
 
-            YsmCrypt.EncryptedPacket result = YsmCrypt.encrypt(outBuf.toArray(), key1, false);
+            YsmCrypt.EncryptedPacket result = YsmCrypt.encrypt(outBuf.toArray(), key1);
             sendModelFile(ByteBuffer.wrap(result.data()));
         }
 
@@ -769,7 +769,7 @@ public class ClientModelManager {
     private static void onModelDataReceived(@Nullable ClientModelInfo parsedBundle, String modelId, boolean isPrimary, boolean isAuth) throws Exception {
         if (isPrimary) {
             pendingModelCallback = () -> {
-                processModelData(parsedBundle, modelId, true, false);
+                processModelData(parsedBundle, modelId, true);
             };
         } else {
             runPendingModelCallback();
@@ -851,7 +851,7 @@ public class ClientModelManager {
             });
             if (obj instanceof Component component) {
                 if (Minecraft.getInstance().player != null) {
-                    Minecraft.getInstance().player.displayClientMessage(component, false);
+                    Minecraft.getInstance().player.sendSystemMessage(component);
                 }
                 YesSteveModel.LOGGER.error(component.getString(256));
             }
@@ -1018,3 +1018,4 @@ public class ClientModelManager {
         });
     }
 }
+

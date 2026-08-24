@@ -134,15 +134,15 @@ public class ModelInfoScreen extends Screen {
         }
     }
 
-    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.fillGradient(this.guiLeft + 25, this.guiTop + 150, this.guiLeft + 305, this.guiTop + 220, -1889838245, -1889838245);
         Metadata metadata2 = this.modelData.getExtraInfo();
         if (metadata2 != null) {
             int lineOffset = 0;
             Iterator it = this.font.split(Component.literal(ModelMetadataPresenter.getLocalizedModelString(this.renderContext, "metadata.tips", metadata2.getTips())), 270).iterator();
             while (it.hasNext()) {
-                guiGraphics.drawString(this.font, (FormattedCharSequence) it.next(), this.guiLeft + 30, this.guiTop + 154 + lineOffset, -1);
+                guiGraphics.text(this.font, (FormattedCharSequence) it.next(), this.guiLeft + 30, this.guiTop + 154 + lineOffset, -1);
                 Objects.requireNonNull(this.font);
                 lineOffset += 9;
                 Objects.requireNonNull(this.font);
@@ -151,7 +151,7 @@ public class ModelInfoScreen extends Screen {
                 }
             }
         }
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
         ((ScreenAccessor) this).ysm$getRenderables().stream().filter(renderable -> {
             return renderable instanceof AuthorButton;
         }).forEach(renderable2 -> {
@@ -160,7 +160,7 @@ public class ModelInfoScreen extends Screen {
     }
 
     @Override
-    protected void renderBlurredBackground(GuiGraphicsExtractor guiGraphics) {
+    protected void extractBlurredBackground(GuiGraphicsExtractor guiGraphics) {
 
     }
 
@@ -168,4 +168,6 @@ public class ModelInfoScreen extends Screen {
         return false;
     }
 }
+
+
 

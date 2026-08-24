@@ -41,7 +41,7 @@ public class SliderOptionRow extends OptionRow<Double> {
         boolean hover = isMouseOverControl(mouseX, mouseY) || dragging;
 
         g.fill(cx, cy, cx + cw, cy + ch, blendBg(hover, 0x41000000));
-        g.renderOutline(cx, cy, cw, ch, 0x90FFFFFF);
+        g.outline(cx, cy, cw, ch, 0x90FFFFFF);
 
         double value = option.get() == null ? min : option.get();
         double range = max - min;
@@ -51,7 +51,7 @@ public class SliderOptionRow extends OptionRow<Double> {
 
         String text = format.format(value) + suffix;
         int tw = Minecraft.getInstance().font.width(text);
-        g.drawString(Minecraft.getInstance().font, Component.literal(text), cx + (cw - tw) / 2, cy + (ch - 8) / 2, 0xFFFFFFFF, true);
+        g.text(Minecraft.getInstance().font, Component.literal(text), cx + (cw - tw) / 2, cy + (ch - 8) / 2, 0xFFFFFFFF, true);
     }
 
     @Override
@@ -81,4 +81,6 @@ public class SliderOptionRow extends OptionRow<Double> {
         option.setPending(Mth.clamp(raw, min, max));
     }
 }
+
+
 

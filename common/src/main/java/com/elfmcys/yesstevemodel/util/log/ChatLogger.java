@@ -21,7 +21,7 @@ public class ChatLogger implements ILogger {
             return;
         }
         Minecraft.getInstance().execute(() -> {
-            Minecraft.getInstance().player.displayClientMessage(Component.translatable("message.yes_steve_model.model.debug_animation.output").append(component), false);
+            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("message.yes_steve_model.model.debug_animation.output").append(component));
         });
     }
 }

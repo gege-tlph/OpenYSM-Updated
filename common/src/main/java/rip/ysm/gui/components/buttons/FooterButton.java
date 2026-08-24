@@ -18,12 +18,12 @@ public class FooterButton extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         int bg = !active ? 0x90282828 : (isHovered() ? new Color(0x90171717, true).getRGB() : 0x90000000);
         g.fill(getX(), getY(), getX() + width, getY() + height, bg);
         int tw = Minecraft.getInstance().font.width(getMessage());
         int color = active ? 0xFFFFFFFF : 0xFF888888;
-        g.drawString(Minecraft.getInstance().font, getMessage(), getX() + (width - tw) / 2, getY() + (height - 8) / 2, color, false);
+        g.text(Minecraft.getInstance().font, getMessage(), getX() + (width - tw) / 2, getY() + (height - 8) / 2, color, false);
     }
 
     @Override
@@ -36,4 +36,5 @@ public class FooterButton extends AbstractWidget {
         defaultButtonNarrationText(out);
     }
 }
+
 

@@ -16,9 +16,9 @@ public class LoadingStateButton extends Button.Plain {
     }
 
     @Override
-    public void renderContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderContents(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawString(Minecraft.getInstance().font, Component.translatable("gui.yes_steve_model.config.loading_state_position"), getX() + 105, getY() + 6, -1, false);
+    protected void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.text(Minecraft.getInstance().font, Component.translatable("gui.yes_steve_model.config.loading_state_position"), getX() + 105, getY() + 6, -1, false);
     }
 
     public @NonNull Component getMessage() {
@@ -54,4 +54,6 @@ public class LoadingStateButton extends Button.Plain {
 
     }
 }
+
+
 

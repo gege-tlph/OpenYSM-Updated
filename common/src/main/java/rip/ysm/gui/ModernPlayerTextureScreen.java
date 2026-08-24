@@ -216,7 +216,7 @@ public class ModernPlayerTextureScreen extends OptionScreen {
     }
 
     @Override
-    public void render(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         hoveredIcon = null;
         for (IconButton btn : icons) {
             if (btn.contains(mouseX, mouseY)) {
@@ -224,7 +224,7 @@ public class ModernPlayerTextureScreen extends OptionScreen {
                 break;
             }
         }
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
         for (IconButton btn : icons) drawIcon(g, btn);
     }
 
@@ -301,13 +301,13 @@ public class ModernPlayerTextureScreen extends OptionScreen {
     protected void renderDescription(GuiGraphicsExtractor g, int descY) {
         if (hoveredIcon != null) {
             g.fill(panelLeft, descY, panelRight, descY + 28, 0x80000000);
-            g.drawString(this.font, hoveredIcon.tooltip, panelLeft + 6, descY + 10, -1, false);
+            g.text(this.font, hoveredIcon.tooltip, panelLeft + 6, descY + 10, -1, false);
             return;
         }
         if (hoveredRow instanceof AnimationRow row) {
             g.fill(panelLeft, descY, panelRight, descY + 28, 0x80000000);
-            g.drawString(this.font, row.getMessage(), panelLeft + 6, descY + 4, -1, false);
-            g.drawString(this.font, Component.literal(row.animKey).withStyle(ChatFormatting.GRAY), panelLeft + 6, descY + 16, 0xFFAAAAAA, false);
+            g.text(this.font, row.getMessage(), panelLeft + 6, descY + 4, -1, false);
+            g.text(this.font, Component.literal(row.animKey).withStyle(ChatFormatting.GRAY), panelLeft + 6, descY + 16, 0xFFAAAAAA, false);
         }
     }
 
@@ -385,4 +385,6 @@ public class ModernPlayerTextureScreen extends OptionScreen {
         return mouseX >= previewLeft && mouseX < previewRight && mouseY >= previewTop && mouseY < previewBottom;
     }
 }
+
+
 

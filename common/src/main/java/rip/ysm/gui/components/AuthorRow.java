@@ -39,7 +39,7 @@ public final class AuthorRow extends OptionRow<Object> {
     }
 
     @Override
-    protected void renderWidget(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         boolean hover = isHovered();
         g.fill(getX(), getY(), getX() + width, getY() + height, hover ? 0x90171717 : 0x90000000);
         int ax = getX() + 4;
@@ -55,17 +55,17 @@ public final class AuthorRow extends OptionRow<Object> {
         int tx = ax + AVATAR_SIZE + 8;
         int textRight = getX() + width - 6;
         int maxTextW = Math.max(40, textRight - tx);
-        g.drawString(font, Component.literal(name).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), tx, getY() + 6, -1, false);
+        g.text(font, Component.literal(name).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), tx, getY() + 6, -1, false);
         if (StringUtils.isNotBlank(role)) {
             int nameW = font.width(name);
-            g.drawString(font, Component.literal(role).withStyle(ChatFormatting.GREEN), tx + nameW + 8, getY() + 6, -1, false);
+            g.text(font, Component.literal(role).withStyle(ChatFormatting.GREEN), tx + nameW + 8, getY() + 6, -1, false);
         }
         int commentY = getY() + 17;
         if (StringUtils.isNotBlank(comment)) {
             List<FormattedCharSequence> lines = font.split(Component.literal(comment), maxTextW);
             int max = Math.min(lines.size(), 2);
             for (int i = 0; i < max; i++) {
-                g.drawString(font, lines.get(i), tx, commentY, 0xFFCCCCCC, false);
+                g.text(font, lines.get(i), tx, commentY, 0xFFCCCCCC, false);
                 commentY += 10;
             }
         }
@@ -81,7 +81,7 @@ public final class AuthorRow extends OptionRow<Object> {
                 if (chipX + chipW > textRight) break;
                 boolean chipHover = mouseX >= chipX && mouseX < chipX + chipW && mouseY >= chipY && mouseY < chipY + 12;
                 g.fill(chipX, chipY, chipX + chipW, chipY + 12, chipHover ? 0xC0444444 : 0x80222222);
-                g.drawString(font, Component.literal(key).withStyle(ChatFormatting.YELLOW), chipX + 4, chipY + 2, -1, false);
+                g.text(font, Component.literal(key).withStyle(ChatFormatting.YELLOW), chipX + 4, chipY + 2, -1, false);
                 if (chipHover) hoveredContactIndex = i;
                 chipX += chipW + 4;
             }
@@ -106,4 +106,5 @@ public final class AuthorRow extends OptionRow<Object> {
         }
     }
 }
+
 

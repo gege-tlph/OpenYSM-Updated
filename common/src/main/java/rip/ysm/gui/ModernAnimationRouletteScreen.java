@@ -115,7 +115,7 @@ public class ModernAnimationRouletteScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         if (GeneralConfig.BLUR_GUI != null && GeneralConfig.BLUR_GUI.get()) collectAndFlushBlur(g);
 
         updateHover(mouseX, mouseY);
@@ -125,7 +125,7 @@ public class ModernAnimationRouletteScreen extends Screen {
         renderPageButtons(g);
         renderPathAndPage(g, mouseX, mouseY);
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     private void collectAndFlushBlur(GuiGraphicsExtractor g) {
@@ -231,7 +231,7 @@ public class ModernAnimationRouletteScreen extends Screen {
             int totalH = lines.size() * 9 + (showKey ? 10 : 0);
             int lineY = ly - totalH / 2;
             for (FormattedCharSequence line : lines) {
-                g.drawCenteredString(this.font, line, lx, lineY, 0xFFFFFFFF);
+                g.centeredText(this.font, line, lx, lineY, 0xFFFFFFFF);
                 lineY += 9;
             }
             if (showKey) renderKeyBinding(g, absoluteIdx, lx, lineY + 1);
@@ -245,7 +245,7 @@ public class ModernAnimationRouletteScreen extends Screen {
         if (km.isUnbound()) label.append(Component.translatable("key.yes_steve_model.extra_animation.none"));
         else label.append(km.getTranslatedKeyMessage());
         label.append(" ]");
-        g.drawCenteredString(this.font, label, x, y, 0xFFCFB058);
+        g.centeredText(this.font, label, x, y, 0xFFCFB058);
     }
 
     private String displayLabel(int absoluteIdx) {
@@ -268,7 +268,7 @@ public class ModernAnimationRouletteScreen extends Screen {
             g.blit(RenderPipelines.GUI_TEXTURED, tex, centerX - 16, centerY - 16, 0.0f, 0.0f, 32, 32, 64, 64, 64, 64);
             GlStateManager._disableBlend();
         } else {
-            g.drawCenteredString(this.font, Component.translatable("gui.yes_steve_model.roulette.stop"), centerX, centerY - 4, 0xFFFFFFFF);
+            g.centeredText(this.font, Component.translatable("gui.yes_steve_model.roulette.stop"), centerX, centerY - 4, 0xFFFFFFFF);
         }
     }
 
@@ -282,13 +282,13 @@ public class ModernAnimationRouletteScreen extends Screen {
         int color = !enabled ? 0x40000000 : (hover ? 0xD0FFFFFF : 0x90000000);
         Pie.draw(g, cx, cy, 0.0f, 16.0f, 0.0f, Pie.tau, color, 1.0f);
         int textColor = enabled ? (hover ? 0xFF000000 : 0xFFFFFFFF) : 0x60FFFFFF;
-        g.drawCenteredString(this.font, arrow, (int) cx, (int) cy - 4, textColor);
+        g.centeredText(this.font, arrow, (int) cx, (int) cy - 4, textColor);
     }
 
     private void renderPathAndPage(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         layoutAndDrawPath(g, mouseX, mouseY);
         String pageStr = String.format("%d/%d", page() + 1, pageCount());
-        g.drawCenteredString(this.font, Component.literal(pageStr).withStyle(ChatFormatting.AQUA), centerX, centerY + 108, 0xFFFFFFFF);
+        g.centeredText(this.font, Component.literal(pageStr).withStyle(ChatFormatting.AQUA), centerX, centerY + 108, 0xFFFFFFFF);
     }
 
     private void layoutAndDrawPath(GuiGraphicsExtractor g, int mouseX, int mouseY) {
@@ -304,7 +304,7 @@ public class ModernAnimationRouletteScreen extends Screen {
             if (i < navigationStack.size() - 1) total += sep;
         }
         int x = centerX - total / 2;
-        g.drawString(this.font, prefix, x, pathY, 0xFFFFFFFF, true);
+        g.text(this.font, prefix, x, pathY, 0xFFFFFFFF, true);
         x += prefixW;
 
         hoveredPathSegment = -1;
@@ -315,14 +315,14 @@ public class ModernAnimationRouletteScreen extends Screen {
             boolean isLast = i == navigationStack.size() - 1;
             boolean hover = mouseX >= x && mouseX < x + w && mouseY >= pathY - 2 && mouseY < pathY + 10;
             int color = isLast ? 0xFFFFCC00 : (hover ? 0xFFFFFFFF : 0xFFAAAAAA);
-            g.drawString(this.font, s, x, pathY, color, true);
+            g.text(this.font, s, x, pathY, color, true);
             if (hover && !isLast) {
                 g.fill(x, pathY + 9, x + w, pathY + 10, color);
                 hoveredPathSegment = i;
             }
             x += w;
             if (i < navigationStack.size() - 1) {
-                g.drawString(this.font, " > ", x, pathY, 0xFF888888, true);
+                g.text(this.font, " > ", x, pathY, 0xFF888888, true);
                 x += sep;
             }
         }
@@ -411,7 +411,7 @@ public class ModernAnimationRouletteScreen extends Screen {
     private void navigateToSubmenu(String value) {
         if (navigationStack.size() > 5) {
             LocalPlayer p = Minecraft.getInstance().player;
-            if (p != null) p.displayClientMessage(Component.translatable("gui.yes_steve_model.roulette.too_long"), false);
+            if (p != null) p.sendSystemMessage(Component.translatable("gui.yes_steve_model.roulette.too_long"));
             return;
         }
         String sub = value.substring(1);
@@ -442,7 +442,7 @@ public class ModernAnimationRouletteScreen extends Screen {
             PlayerCapability.get(player).ifPresent(cap -> cap.requestModelSwitch(key));
         }
         if (player != null && GeneralConfig.PRINT_ANIMATION_ROULETTE_MSG.get()) {
-            player.displayClientMessage(Component.translatable("message.yes_steve_model.model.animation_roulette.play", key), false);
+            player.sendSystemMessage(Component.translatable("message.yes_steve_model.model.animation_roulette.play", key));
         }
         Minecraft.getInstance().setScreen(null);
     }
@@ -456,4 +456,7 @@ public class ModernAnimationRouletteScreen extends Screen {
         return false;
     }
 }
+
+
+
 

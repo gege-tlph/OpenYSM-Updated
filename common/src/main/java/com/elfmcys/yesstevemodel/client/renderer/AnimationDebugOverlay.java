@@ -95,7 +95,7 @@ public class AnimationDebugOverlay {
             MutableComponent mutableComponentAppend = Component.translatable("message.yes_steve_model.model.debug_animation.true").append(" -> ");
             Component customName = entity.getCustomName();
             Objects.requireNonNull(entity);
-            localPlayer.displayClientMessage(mutableComponentAppend.append(Objects.requireNonNullElseGet(customName, entity::getDisplayName)), false);
+            localPlayer.sendSystemMessage(mutableComponentAppend.append(Objects.requireNonNullElseGet(customName, entity::getDisplayName)));
         }
     }
 
@@ -108,7 +108,7 @@ public class AnimationDebugOverlay {
             activeModel = null;
             LocalPlayer localPlayer = Minecraft.getInstance().player;
             if (localPlayer != null) {
-                localPlayer.displayClientMessage(Component.translatable("message.yes_steve_model.model.debug_animation.false"), false);
+                localPlayer.sendSystemMessage(Component.translatable("message.yes_steve_model.model.debug_animation.false"));
             }
         }
     }
@@ -155,9 +155,11 @@ public class AnimationDebugOverlay {
         } else {
             guiGraphics.fill(2, currentY[0] - 1, screenWidth, currentY[0] + 9, -1068474288);
         }
-        guiGraphics.drawString(font, key, 5, currentY[0], -1);
-        guiGraphics.drawString(font, value, screenWidth / 2, currentY[0], -1);
+        guiGraphics.text(font, key, 5, currentY[0], -1);
+        guiGraphics.text(font, value, screenWidth / 2, currentY[0], -1);
         currentY[0] = currentY[0] + 10;
     }
 }
+
+
 
