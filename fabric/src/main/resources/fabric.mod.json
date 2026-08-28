@@ -3,10 +3,14 @@
   "id": "yes_steve_model",
   "version": "${version}",
   "name": "Yes Steve Model",
-  "description": "",
+  "description": "Replace your player model with custom Bedrock/Gecko models, with animations, texture switching and an animation roulette. Unofficial fork of OpenYSM for Minecraft 26.1.2 on Fabric.",
   "authors": ["Tianjin Accessible Care Innovation Development Co., Ltd."],
+  "contributors": ["OpenYSM-Updated contributors"],
   "contact": {
-    "homepage": ""  },
+    "homepage": "https://github.com/gege-tlph/OpenYSM-Updated",
+    "sources": "https://github.com/gege-tlph/OpenYSM-Updated",
+    "issues": "https://github.com/gege-tlph/OpenYSM-Updated/issues"
+  },
   "license": "MIT",
   "icon": "yesstevemodel.png",
   "environment": "*",
@@ -26,15 +30,10 @@
     "yes_steve_model_fabric.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.17.0",
+    "fabricloader": ">=0.19.2",
+    "fabric-api": "*",
     "minecraft": "~26.1.2",
     "java": ">=25"
-  },
-  "suggests": {
-    "touhou_little_maid": ">=0.8.5-neo1.5.3"
-  },
-  "breaks": {
-    "touhou_little_maid": "<0.8.5-neo1.5.3"
   },
   "custom": {
     "cardinal-components": [

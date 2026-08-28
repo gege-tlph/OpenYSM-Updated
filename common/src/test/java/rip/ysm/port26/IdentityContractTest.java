@@ -69,6 +69,32 @@ class IdentityContractTest {
         return Files.readString(repoFile(relative), StandardCharsets.UTF_8);
     }
 
+    @Test
+    void tlmDeclarationMatchesTheFrozenCompatState() throws Exception {
+        String metadata = readRepoFile("fabric/src/main/resources/fabric.mod.json");
+        // The TLM compat layer is entirely no-op on 26.1.2 (fabric/tlm/** is excluded from
+        // compilation, the platform entries return no-ops), and upstream ships no 26.x build.
+        // Declaring `breaks: touhou_little_maid` would refuse to load next to a mod we neither
+        // integrate with nor conflict with; `suggests` would advertise an ability we do not have.
+        assertFalse(metadata.contains("\"breaks\""),
+                "no breaks declaration should remain while TLM compat is frozen");
+        assertFalse(metadata.contains("touhou_little_maid"),
+                "fabric.mod.json must not reference TLM while its integration is frozen");
+    }
+
+    @Test
+    void loaderFloorMatchesWhatWeBuildAgainst() throws Exception {
+        String metadata = readRepoFile("fabric/src/main/resources/fabric.mod.json");
+        String properties = readRepoFile("gradle.properties");
+        String built = properties.lines()
+                .filter(line -> line.startsWith("fabric_loader_version"))
+                .map(line -> line.substring(line.indexOf('=') + 1).trim())
+                .findFirst()
+                .orElseThrow();
+        assertTrue(metadata.contains("\"fabricloader\": \">=" + built + "\""),
+                "fabric.mod.json loader floor must match the loader we build against (" + built + ")");
+    }
+
     static Path repoFile(String relative) {
         List<Path> starts = new ArrayList<>();
         starts.add(Path.of("").toAbsolutePath());

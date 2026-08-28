@@ -26,6 +26,11 @@ configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
+    // The contract tests live in common/src/test and are compiled by BOTH projects (see the
+    // test sourceSet above). Without these, :fabric:compileTestJava cannot see common's main
+    // classes and any test touching product code fails to compile here but passes in :common.
+    testCompileClasspath.extendsFrom common
+    testRuntimeClasspath.extendsFrom common
 }
 
 configurations {

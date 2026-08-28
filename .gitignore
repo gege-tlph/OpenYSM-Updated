@@ -114,3 +114,6 @@ fabric/run-*/
 
 # Acceptance tooling logs (tools/*.ps1)
 tools-logs/
+
+# JUnit run artifacts from tests that touch the client audio decoder
+common/logs/

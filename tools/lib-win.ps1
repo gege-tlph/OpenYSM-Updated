@@ -282,6 +282,49 @@ function Save-CroppedImage {
     } finally { $src.Dispose() }
 }
 
+function Save-ContactSheet {
+    <#
+      .SYNOPSIS Compose labelled thumbnails into one grid image.
+      .DESCRIPTION Lets a whole corpus (all builtin models, all camera modes) be reviewed
+      as a single image instead of dozens of separate captures.
+    #>
+    param(
+        [Parameter(Mandatory)][string[]]$Images,
+        [Parameter(Mandatory)][string[]]$Labels,
+        [Parameter(Mandatory)][string]$Destination,
+        [int]$Columns = 7,
+        [int]$CellWidth = 190,
+        [int]$CellHeight = 150
+    )
+    Add-Type -AssemblyName System.Drawing
+    $rows = [Math]::Ceiling($Images.Count / [double]$Columns)
+    $labelH = 16
+    $bmp = New-Object System.Drawing.Bitmap ($Columns * $CellWidth), ([int]($rows * ($CellHeight + $labelH)))
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.Clear([System.Drawing.Color]::FromArgb(24, 24, 28))
+    $font = New-Object System.Drawing.Font('Consolas', 8)
+    $brush = [System.Drawing.Brushes]::White
+    for ($i = 0; $i -lt $Images.Count; $i++) {
+        $col = $i % $Columns
+        $row = [Math]::Floor($i / $Columns)
+        $x = $col * $CellWidth
+        $y = $row * ($CellHeight + $labelH)
+        if (Test-Path $Images[$i]) {
+            $img = [System.Drawing.Image]::FromFile($Images[$i])
+            try {
+                $g.DrawImage($img, (New-Object System.Drawing.Rectangle $x, ($y + $labelH), $CellWidth, $CellHeight))
+            } finally { $img.Dispose() }
+        }
+        $g.DrawString($Labels[$i], $font, $brush, $x + 2, $y + 1)
+    }
+    $g.Dispose()
+    $dir = Split-Path -Parent $Destination
+    if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+    $bmp.Save($Destination, [System.Drawing.Imaging.ImageFormat]::Png)
+    $bmp.Dispose()
+    return $Destination
+}
+
 function Get-ImageDifference {
     <#
       .SYNOPSIS Mean absolute per-pixel difference (0-255) between two PNGs, sampled on a grid.
