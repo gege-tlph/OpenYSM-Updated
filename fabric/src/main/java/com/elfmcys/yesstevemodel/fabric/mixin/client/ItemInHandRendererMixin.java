@@ -33,35 +33,7 @@ public abstract class ItemInHandRendererMixin {
     }
 
     @Unique
-    private static int ysm$probeLeft = 2;
-
-    @Unique
-
     private boolean ysm$dispatchHandRender(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, HumanoidArm humanoidArm) {
-        if (System.getenv("YSM_ARM_PROBE") != null && ysm$probeLeft-- > 0) {
-            // Where does vanilla's own arm actually land? Submit the vanilla ModelPart's
-            // pivot through the same pose and print it, then print ours, in one frame.
-            AvatarRenderer self = (AvatarRenderer) (Object) this;
-            net.minecraft.client.model.player.PlayerModel pm =
-                    (net.minecraft.client.model.player.PlayerModel) self.getModel();
-            net.minecraft.client.model.geom.ModelPart vanillaArm =
-                    humanoidArm == HumanoidArm.RIGHT ? pm.rightArm : pm.leftArm;
-            org.joml.Matrix4f base = new org.joml.Matrix4f(poseStack.last().pose());
-            // ModelPart pivots are in 1/16 units; vanilla applies that inside compile().
-            org.joml.Vector3f vanillaPivot = base.transformPosition(
-                    new org.joml.Vector3f(vanillaArm.x / 16f, vanillaArm.y / 16f, vanillaArm.z / 16f));
-            org.joml.Matrix4f ours = new org.joml.Matrix4f(poseStack.last().pose());
-            ours.translate(humanoidArm == HumanoidArm.LEFT ? 0.25f : -0.25f, 1.8f, 0f);
-            ours.scale(-1f, -1f, 1f);
-            // Approximate shoulder position in YSM model space (blocks, +Y up).
-            org.joml.Vector3f oursPos = ours.transformPosition(new org.joml.Vector3f(0f, 1.4f, 0f));
-            System.out.println(String.format(
-                    "[ysm-arm-probe] arm=%s vanillaPart=(%.3f,%.3f,%.3f) vanillaWorld=(%.3f,%.3f,%.3f) ours=(%.3f,%.3f,%.3f) delta=(%.3f,%.3f,%.3f)",
-                    humanoidArm, vanillaArm.x, vanillaArm.y, vanillaArm.z,
-                    vanillaPivot.x, vanillaPivot.y, vanillaPivot.z,
-                    oursPos.x, oursPos.y, oursPos.z,
-                    vanillaPivot.x - oursPos.x, vanillaPivot.y - oursPos.y, vanillaPivot.z - oursPos.z));
-        }
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) {
             return false;
