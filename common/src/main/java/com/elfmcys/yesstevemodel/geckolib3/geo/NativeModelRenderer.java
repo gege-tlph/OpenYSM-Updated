@@ -38,12 +38,13 @@ public class NativeModelRenderer {
         boolean isPreview = ModelPreviewRenderer.isPreview() || ModelPreviewRenderer.isExtraPlayer();
 
         // The raw-GL fast paths below draw with the model-view matrix captured above.
-        // Under 26.1's submit pipeline the draw happens in a later phase where that
-        // matrix no longer describes this model's placement, so the model lands at an
-        // arbitrary spot on screen. Inside a collector context, fall through to the
-        // VertexConsumer paths, which the collector transforms correctly.
-        boolean submitPipeline = RenderContext.isCollectorActive();
-        if (textureLocation != null && NativeLibLoader.isLoaded() && !GeneralConfig.USE_COMPATIBILITY_RENDERER.get() && GeneralConfig.USE_GPU_RENDERER.get() && !submitPipeline) {
+        // In a deferred submitCustomGeometry callback that matrix no longer describes
+        // this model's placement, so the model lands at an arbitrary spot on screen;
+        // fall through to the VertexConsumer paths, which the collector transforms
+        // correctly. Immediate-mode drawing inside the submit phase (first-person arm,
+        // GUI preview) still has a valid matrix and keeps this fast path.
+        boolean deferredDraw = RenderContext.isSubmittedDraw();
+        if (textureLocation != null && NativeLibLoader.isLoaded() && !GeneralConfig.USE_COMPATIBILITY_RENDERER.get() && GeneralConfig.USE_GPU_RENDERER.get() && !deferredDraw) {
 
             if(!GpuCapability.isAvailable())
             {

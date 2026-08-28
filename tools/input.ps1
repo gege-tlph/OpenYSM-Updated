@@ -35,7 +35,11 @@ if ([string]::IsNullOrWhiteSpace($Token)) { $Token = Split-Path -Leaf $GameDir }
 
 $win = Get-McWindow -Token $Token
 if (-not $win) { Write-Error "No Minecraft window found for token '$Token'."; exit 2 }
-if (-not $NoFocus) { [void](Set-McForeground -Hwnd $win.Hwnd) }
+if (-not $NoFocus) {
+    if (-not (Confirm-McForeground -Hwnd $win.Hwnd)) {
+        Write-Host '[input] warning: window did not reach the foreground; input may go elsewhere'
+    }
+}
 Write-Host "[input] token=$Token pid=$($win.ProcessId) hwnd=$($win.Hwnd)"
 
 foreach ($k in $Keys) {

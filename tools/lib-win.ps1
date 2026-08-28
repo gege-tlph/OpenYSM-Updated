@@ -134,6 +134,22 @@ function Set-McForeground {
     return $ok
 }
 
+function Confirm-McForeground {
+    <#
+      .SYNOPSIS Raise a window and verify it actually became the foreground window.
+      .DESCRIPTION Windows can silently refuse SetForegroundWindow; sending input to a
+      window that never got focus is how keystrokes end up in the wrong client.
+    #>
+    param([Parameter(Mandatory)][IntPtr]$Hwnd, [int]$Attempts = 3)
+
+    for ($i = 0; $i -lt $Attempts; $i++) {
+        [void](Set-McForeground -Hwnd $Hwnd)
+        Start-Sleep -Milliseconds 350
+        if ([YsmWin]::GetForegroundWindow() -eq $Hwnd) { return $true }
+    }
+    return ([YsmWin]::GetForegroundWindow() -eq $Hwnd)
+}
+
 function Send-McKey {
     <#
       .SYNOPSIS Send a key to the focused window (SendInput-style), or post it to a hwnd as fallback.
@@ -228,6 +244,41 @@ function Save-ResizedImage {
         $bmp.Save($Destination, [System.Drawing.Imaging.ImageFormat]::Png)
         $bmp.Dispose()
         return [pscustomobject]@{ Path = $Destination; Width = $w; Height = $h }
+    } finally { $src.Dispose() }
+}
+
+function Save-CroppedImage {
+    <#
+      .SYNOPSIS Crop a region of a PNG (normalised 0..1 coords) and save it, scaled to fit MaxWidth.
+      .DESCRIPTION Used to inspect one detail (a hand, a layer, a GUI widget) at native
+      resolution instead of reading a whole downscaled frame.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$Source,
+        [Parameter(Mandatory)][string]$Destination,
+        [double]$X = 0, [double]$Y = 0, [double]$W = 1, [double]$H = 1,
+        [int]$MaxWidth = 960
+    )
+    Add-Type -AssemblyName System.Drawing
+    $src = [System.Drawing.Image]::FromFile($Source)
+    try {
+        $cx = [int]($src.Width * $X); $cy = [int]($src.Height * $Y)
+        $cw = [Math]::Max(1, [int]($src.Width * $W)); $ch = [Math]::Max(1, [int]($src.Height * $H))
+        if ($cx + $cw -gt $src.Width)  { $cw = $src.Width  - $cx }
+        if ($cy + $ch -gt $src.Height) { $ch = $src.Height - $cy }
+        $rect = New-Object System.Drawing.Rectangle $cx, $cy, $cw, $ch
+        $scale = [Math]::Min(4.0, $MaxWidth / [double]$cw)
+        $ow = [int]($cw * $scale); $oh = [int]($ch * $scale)
+        $bmp = New-Object System.Drawing.Bitmap $ow, $oh
+        $g = [System.Drawing.Graphics]::FromImage($bmp)
+        $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::NearestNeighbor
+        $g.DrawImage($src, (New-Object System.Drawing.Rectangle 0, 0, $ow, $oh), $rect, [System.Drawing.GraphicsUnit]::Pixel)
+        $g.Dispose()
+        $dir = Split-Path -Parent $Destination
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+        $bmp.Save($Destination, [System.Drawing.Imaging.ImageFormat]::Png)
+        $bmp.Dispose()
+        return [pscustomobject]@{ Path = $Destination; Width = $ow; Height = $oh }
     } finally { $src.Dispose() }
 }
 

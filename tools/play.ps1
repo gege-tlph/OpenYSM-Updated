@@ -22,6 +22,8 @@ param(
     [int]$TimeoutSec    = 420,
     [string]$LogDir     = 'tools-logs',
     [switch]$EnableRcon,
+    [switch]$Flat,
+    [string]$FlatWorldName = 'flatgate',
     [string]$RconPassword = 'ysmgate',
     [int]$RconPort      = 25575
 )
@@ -40,11 +42,31 @@ if (Test-Path $log) { Remove-Item $log -Force }
 
 if ($Role -eq 'server') {
     $runDir = Join-Path $repoRoot 'fabric\run'
-    if ($EnableRcon) {
+    if ($EnableRcon -or $Flat) {
         $props = Join-Path $runDir 'server.properties'
         if (Test-Path $props) {
             $lines = Get-Content $props
-            $map = @{ 'enable-rcon' = 'true'; 'rcon.password' = $RconPassword; 'rcon.port' = "$RconPort"; 'broadcast-rcon-to-ops' = 'false' }
+            $map = @{}
+            if ($EnableRcon) {
+                $map += @{ 'enable-rcon' = 'true'; 'rcon.password' = $RconPassword; 'rcon.port' = "$RconPort"; 'broadcast-rcon-to-ops' = 'false' }
+            }
+            if ($Flat) {
+                # A superflat, structure-free, mob-free world keeps acceptance screenshots
+                # about the model under test instead of the scenery around it.
+                $map += @{
+                    'level-name'          = $FlatWorldName
+                    'level-type'          = 'minecraft:flat'
+                    'generate-structures' = 'false'
+                    'spawn-monsters'      = 'false'
+                    'spawn-animals'       = 'false'
+                    'spawn-npcs'          = 'false'
+                    'difficulty'          = 'peaceful'
+                    'gamemode'            = 'creative'
+                    'force-gamemode'      = 'true'
+                    'allow-nether'        = 'false'
+                    'view-distance'       = '8'
+                }
+            }
             foreach ($k in $map.Keys) {
                 if ($lines -match "^$([regex]::Escape($k))=") {
                     $lines = $lines -replace "^$([regex]::Escape($k))=.*", "$k=$($map[$k])"

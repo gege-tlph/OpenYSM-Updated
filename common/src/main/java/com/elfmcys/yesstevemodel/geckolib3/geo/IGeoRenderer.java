@@ -74,7 +74,7 @@ public interface IGeoRenderer<T extends AnimatableEntity<?>> {
      * Draw-phase half of {@link #renderWithBoneAndRenderType}. This runs after the submit
      * phase has already unwound, so it restores the state the mesh renderer reads from
      * thread-wide flags: the preview flags that were set when the model was posed, and the
-     * collector itself — {@link RenderContext#isCollectorActive()} is what keeps
+     * collector itself — {@link RenderContext#isSubmittedDraw()} is what keeps
      * {@link NativeModelRenderer} off the raw-GL fast path, whose captured model-view
      * matrix is meaningless once the draw phase has taken over.
      */
@@ -88,13 +88,16 @@ public interface IGeoRenderer<T extends AnimatableEntity<?>> {
         boolean previousExtraPlayer = ModelPreviewRenderer.isExtraPlayer();
         SubmitNodeCollector previousCollector = RenderContext.collector();
         CameraRenderState previousCamera = RenderContext.camera();
+        boolean previousSubmittedDraw = RenderContext.isSubmittedDraw();
         ModelPreviewRenderer.setPreviewMode(previewMode);
         ModelPreviewRenderer.setExtraPlayerMode(extraPlayerMode);
         RenderContext.enter(collector, camera);
+        RenderContext.beginSubmittedDraw();
         try {
             NativeModelRenderer.renderMesh(buffer, pose, geoModel, boneParams, stateBuffer, textureIndex, 0,
                     packedLight, packedOverlay, red, green, blue, alpha, tex);
         } finally {
+            RenderContext.endSubmittedDraw(previousSubmittedDraw);
             if (previousCollector == null) {
                 RenderContext.exit();
             } else {

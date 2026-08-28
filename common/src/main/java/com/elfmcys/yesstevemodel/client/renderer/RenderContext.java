@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 public final class RenderContext {
     private static final ThreadLocal<SubmitNodeCollector> COLLECTOR = new ThreadLocal<>();
     private static final ThreadLocal<CameraRenderState> CAMERA = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> SUBMITTED_DRAW = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     private RenderContext() {
     }
@@ -27,16 +28,31 @@ public final class RenderContext {
     }
 
     /**
-     * True while rendering runs under 26.1's submit/collector pipeline — either in the
-     * submit phase itself or inside a deferred {@code submitCustomGeometry} callback.
+     * True only while a deferred {@code submitCustomGeometry} callback is running.
      *
      * <p>Renderers that bypass the {@link net.minecraft.client.renderer.MultiBufferSource}
-     * and issue raw GL with {@code RenderSystem.getModelViewMatrix()} must not run here:
-     * the matrix in effect during the deferred draw is not the one the model was posed
-     * against, which draws the model at an arbitrary place on screen.
+     * and issue raw GL with {@code RenderSystem.getModelViewMatrix()} must not run there:
+     * by draw time that matrix no longer describes the model's placement, so the model is
+     * drawn at an arbitrary spot on screen.
+     *
+     * <p>Deliberately narrower than "a collector is set": immediate-mode drawing that merely
+     * happens inside the submit phase (first-person arm and held item, GUI previews) still
+     * runs against the current matrix and keeps its raw-GL fast path.
      */
-    public static boolean isCollectorActive() {
-        return COLLECTOR.get() != null;
+    public static boolean isSubmittedDraw() {
+        return SUBMITTED_DRAW.get();
+    }
+
+    public static void beginSubmittedDraw() {
+        SUBMITTED_DRAW.set(Boolean.TRUE);
+    }
+
+    public static void endSubmittedDraw(boolean previous) {
+        if (previous) {
+            SUBMITTED_DRAW.set(Boolean.TRUE);
+        } else {
+            SUBMITTED_DRAW.remove();
+        }
     }
 
     @Nullable
