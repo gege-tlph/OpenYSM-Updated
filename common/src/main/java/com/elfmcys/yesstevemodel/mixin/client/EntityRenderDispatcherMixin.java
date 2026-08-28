@@ -96,12 +96,11 @@ public abstract class EntityRenderDispatcherMixin implements IEntityRenderDispat
             }
             return true;
         } finally {
-            // Same shared-BufferSource flush gap as ReplacePlayerRenderEvent (see there for
-            // the full explanation): vehicles/projectiles/fishing hooks are drawn immediately
-            // into the singleton bufferSource during this submit-phase callback, so it must be
-            // flushed here or the geometry never reaches the framebuffer for remote viewers.
-            // Skip only the Oculus shadow pass to avoid the shadow-map culling flicker that an
-            // unconditional flush caused there.
+            // Vehicle/projectile/fishing-hook models are submitted through the 26.1
+            // collector (IGeoRenderer#renderWithBoneAndRenderType); this flush only covers
+            // whatever legacy immediate-mode drawing those renderers still do around the
+            // model itself. Skip the Oculus shadow pass to avoid the shadow-map culling
+            // flicker an unconditional flush caused there.
             if (!OculusCompat.isRenderingShadowPass()) {
                 bufferSource.endBatch();
             }

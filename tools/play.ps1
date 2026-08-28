@@ -64,10 +64,16 @@ if ($Role -eq 'server') {
     if (-not [System.IO.Path]::IsPathRooted($GameDir)) { $GameDir = Join-Path $repoRoot $GameDir }
     if (-not (Test-Path $GameDir)) { New-Item -ItemType Directory -Path $GameDir -Force | Out-Null }
 
-    $mcArgs = "--username $Name --gameDir `"$GameDir`" --width $Width --height $Height"
+    if ($GameDir -match '\s') {
+        Write-Error "game dir must not contain spaces (gradle --args cannot carry nested quoting): $GameDir"
+        exit 2
+    }
+    $mcArgs = "--username $Name --gameDir $GameDir --width $Width --height $Height"
     if ($Server -ne '') { $mcArgs += " --quickPlayMultiplayer $Server" }
     elseif ($World -ne '') { $mcArgs += " --quickPlaySingleplayer $World" }
-    $gradleArgs = @(':fabric:runClient', '--no-daemon', '--console=plain', "--args=$mcArgs")
+    # The whole --args value is one argv element; without the embedded quotes
+    # Start-Process splits on spaces and gradle reads "Alice" as a task name.
+    $gradleArgs = @(':fabric:runClient', '--no-daemon', '--console=plain', "--args=`"$mcArgs`"")
 }
 
 $gradlew = Join-Path $repoRoot 'gradlew.bat'

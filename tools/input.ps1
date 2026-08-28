@@ -19,6 +19,8 @@ param(
     [string]$Text    = "",
     [int]$ClickX     = -1,
     [int]$ClickY     = -1,
+    [double]$ClickNX = -1,   # normalised 0..1 of the client area (display scaling safe)
+    [double]$ClickNY = -1,
     [int]$HoldMs     = 60,
     [int]$GapMs      = 250,
     [switch]$NoFocus
@@ -57,8 +59,14 @@ if ($Text -ne "") {
     Write-Host "[input] typed: $Text"
 }
 
+$rect = Get-McClientRect -Hwnd $win.Hwnd
+if ($ClickNX -ge 0 -and $ClickNY -ge 0) {
+    # Windows display scaling means the client area is usually smaller than the
+    # --width/--height the client was launched with; normalised coords stay correct.
+    $ClickX = [int]($rect.Width * $ClickNX)
+    $ClickY = [int]($rect.Height * $ClickNY)
+}
 if ($ClickX -ge 0 -and $ClickY -ge 0) {
     Send-McClick -Hwnd $win.Hwnd -X $ClickX -Y $ClickY
-    $rect = Get-McClientRect -Hwnd $win.Hwnd
     Write-Host "[input] click at client ($ClickX,$ClickY) of $($rect.Width)x$($rect.Height)"
 }

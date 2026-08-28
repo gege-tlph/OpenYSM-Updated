@@ -4,6 +4,7 @@ package com.elfmcys.yesstevemodel.geckolib3.geo;
 
 import com.elfmcys.yesstevemodel.NativeLibLoader;
 import com.elfmcys.yesstevemodel.client.renderer.ModelPreviewRenderer;
+import com.elfmcys.yesstevemodel.client.renderer.RenderContext;
 import com.elfmcys.yesstevemodel.config.GeneralConfig;
 import com.elfmcys.yesstevemodel.geckolib3.geo.render.built.*;
 import com.elfmcys.yesstevemodel.util.log.ChatLogger;
@@ -36,7 +37,13 @@ public class NativeModelRenderer {
         projectionModelViewMatrix.set(RenderSystem.getModelViewMatrix());
         boolean isPreview = ModelPreviewRenderer.isPreview() || ModelPreviewRenderer.isExtraPlayer();
 
-        if (textureLocation != null && NativeLibLoader.isLoaded() && !GeneralConfig.USE_COMPATIBILITY_RENDERER.get() && GeneralConfig.USE_GPU_RENDERER.get()) {
+        // The raw-GL fast paths below draw with the model-view matrix captured above.
+        // Under 26.1's submit pipeline the draw happens in a later phase where that
+        // matrix no longer describes this model's placement, so the model lands at an
+        // arbitrary spot on screen. Inside a collector context, fall through to the
+        // VertexConsumer paths, which the collector transforms correctly.
+        boolean submitPipeline = RenderContext.isCollectorActive();
+        if (textureLocation != null && NativeLibLoader.isLoaded() && !GeneralConfig.USE_COMPATIBILITY_RENDERER.get() && GeneralConfig.USE_GPU_RENDERER.get() && !submitPipeline) {
 
             if(!GpuCapability.isAvailable())
             {
@@ -56,6 +63,9 @@ public class NativeModelRenderer {
             }
         }
 
+        // The native SIMD path writes into the VertexConsumer the collector hands us and
+        // transforms with pose.pose()/pose.normal(), so it stays enabled under the submit
+        // pipeline; only the raw-GL paths above are excluded.
         if (NativeLibLoader.isLoaded() && !GeneralConfig.USE_COMPATIBILITY_RENDERER.get() && !isPreview) { // WIP: SIMD MODEL RENDER
             nativeRenderModel(
                     buffer,
