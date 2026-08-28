@@ -106,5 +106,82 @@ tasks.named('remapSourcesJar') {
 
 test {
     useJUnitPlatform()
-    failOnNoDiscoveredTests = false
+    // G2 requires the contract tests to actually run; a silent NO-SOURCE run
+    // would otherwise pass the gate without executing anything.
+    failOnNoDiscoveredTests = true
+}
+
+// G3 artifact smoke: assert the *packaged* jar, not the source tree. The
+// rip.ysm.port26 contract tests only ever inspected common/src, so a packaging
+// regression (missing natives, stray Minecraft classes, dev-shadow leakage)
+// could not be caught before this task existed.
+tasks.register('verifyReleaseJar') {
+    group = 'verification'
+    description = 'Verify the remapped Fabric jar contains exactly the expected shipped contents.'
+    dependsOn tasks.named('remapJar')
+
+    doLast {
+        def jarFile = tasks.named('remapJar').get().archiveFile.get().asFile
+        if (!jarFile.exists()) {
+            throw new GradleException("remapped jar not found: ${jarFile}")
+        }
+
+        def entries = []
+        new java.util.zip.ZipFile(jarFile).withCloseable { zip ->
+            zip.entries().each { entries << it.name }
+        }
+
+        def problems = []
+        def requireEntry = { String path ->
+            if (!entries.contains(path)) { problems << "missing required entry: ${path}" }
+        }
+
+        requireEntry 'fabric.mod.json'
+        requireEntry 'yes_steve_model.mixins.json'
+        requireEntry 'yes_steve_model_fabric.mixins.json'
+        requireEntry 'com/elfmcys/yesstevemodel/YesSteveModel.class'
+        requireEntry 'native-manifest.json'
+
+        def natives = entries.findAll { it.startsWith('natives/') && !it.endsWith('/') }
+        if (natives.size() != 6) {
+            problems << "expected 6 native artifacts, found ${natives.size()}: ${natives}"
+        }
+
+        def builtin = entries.findAll { it.startsWith('assets/yes_steve_model/builtin/') && !it.endsWith('/') }
+        if (builtin.size() != 621) {
+            problems << "builtin resource corpus in jar changed: expected 621, found ${builtin.size()}"
+        }
+        def descriptors = builtin.findAll { it.endsWith('.ysm') || it.endsWith('/ysm.json') }
+        if (descriptors.size() != 27) {
+            problems << "builtin model descriptors in jar changed: expected 27, found ${descriptors.size()}"
+        }
+
+        def minecraftClasses = entries.findAll { it.startsWith('net/minecraft/') }
+        if (!minecraftClasses.isEmpty()) {
+            problems << "jar leaks ${minecraftClasses.size()} Minecraft classes (first: ${minecraftClasses[0]})"
+        }
+        def sparkleLeaks = entries.findAll { it.toLowerCase().contains('sparkle_morpher') || it.contains('com/micaftic/') }
+        if (!sparkleLeaks.isEmpty()) {
+            problems << "jar leaks donor identity: ${sparkleLeaks.take(3)}"
+        }
+        if (jarFile.name.contains('dev-shadow')) {
+            problems << "verified the dev-shadow jar instead of the remapped jar: ${jarFile.name}"
+        }
+
+        def modJson = null
+        new java.util.zip.ZipFile(jarFile).withCloseable { zip ->
+            modJson = zip.getInputStream(zip.getEntry('fabric.mod.json')).text
+        }
+        if (!(modJson =~ /"id"\s*:\s*"yes_steve_model"/)) {
+            problems << 'fabric.mod.json no longer declares mod id yes_steve_model'
+        }
+        if (modJson.contains('${version}')) {
+            problems << 'fabric.mod.json version placeholder was not expanded'
+        }
+
+        if (problems) {
+            throw new GradleException("verifyReleaseJar failed:\n  - " + problems.join('\n  - '))
+        }
+        logger.lifecycle("verifyReleaseJar OK: ${jarFile.name} (${jarFile.length()} bytes, ${entries.size()} entries, ${natives.size()} natives, ${builtin.size()} builtin files)")
+    }
 }

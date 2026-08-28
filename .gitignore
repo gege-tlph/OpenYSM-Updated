@@ -108,3 +108,9 @@ gradle-app.setting
 
 # Architectury transformer 的构建产物
 .architectury-transformer/
+
+# Dev run directories created by loom runClient/runServer with a custom --gameDir
+fabric/run-*/
+
+# Acceptance tooling logs (tools/*.ps1)
+tools-logs/
