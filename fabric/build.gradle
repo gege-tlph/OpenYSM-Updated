@@ -7,6 +7,20 @@ architectury {
     fabric()
 }
 
+// Dev-only: let tools/play.ps1 attach a JDWP agent to the dev client so method-body edits
+// can be hot-swapped into a running game (JetBrains Runtime's enhanced HotSwap) instead of
+// paying a full client restart per iteration. Never affects the published jar.
+def ysmDebugJvmArgs = System.getenv('YSM_DEBUG_JVM_ARGS')
+if (ysmDebugJvmArgs) {
+    loom {
+        runs {
+            client {
+                vmArgs ysmDebugJvmArgs.split(' ')
+            }
+        }
+    }
+}
+
 sourceSets {
     main {
         java.exclude 'rip/ysm/compat/touhoulittlemaid/fabric/tlm/**'

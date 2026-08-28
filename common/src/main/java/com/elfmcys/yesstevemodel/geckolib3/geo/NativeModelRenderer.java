@@ -44,7 +44,14 @@ public class NativeModelRenderer {
         // correctly. Immediate-mode drawing inside the submit phase (first-person arm,
         // GUI preview) still has a valid matrix and keeps this fast path.
         boolean deferredDraw = RenderContext.isSubmittedDraw();
-        if (textureLocation != null && NativeLibLoader.isLoaded() && !GeneralConfig.USE_COMPATIBILITY_RENDERER.get() && GeneralConfig.USE_GPU_RENDERER.get() && !deferredDraw) {
+        // The accelerated paths only render a whole model correctly. Asked for a subset
+        // (renderPartMask != 0 - the first-person arm and the background arm), they emit
+        // a partial set of faces, which reads on screen as an arm with faces missing;
+        // the Java path produces the same result as vanilla's own arm. Those callers draw
+        // a handful of bones, so taking the slow path there costs nothing measurable, and
+        // full-model rendering keeps the acceleration.
+        boolean partialModel = renderPartMask != 0;
+        if (textureLocation != null && NativeLibLoader.isLoaded() && !GeneralConfig.USE_COMPATIBILITY_RENDERER.get() && GeneralConfig.USE_GPU_RENDERER.get() && !deferredDraw && !partialModel) {
 
             if(!GpuCapability.isAvailable())
             {
@@ -67,7 +74,7 @@ public class NativeModelRenderer {
         // The native SIMD path writes into the VertexConsumer the collector hands us and
         // transforms with pose.pose()/pose.normal(), so it stays enabled under the submit
         // pipeline; only the raw-GL paths above are excluded.
-        if (NativeLibLoader.isLoaded() && !GeneralConfig.USE_COMPATIBILITY_RENDERER.get() && !isPreview) { // WIP: SIMD MODEL RENDER
+        if (NativeLibLoader.isLoaded() && !GeneralConfig.USE_COMPATIBILITY_RENDERER.get() && !isPreview && !partialModel) { // WIP: SIMD MODEL RENDER
             nativeRenderModel(
                     buffer,
                     pose,

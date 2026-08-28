@@ -23,6 +23,9 @@ param(
     [string]$LogDir     = 'tools-logs',
     [switch]$EnableRcon,
     [switch]$Flat,
+    [switch]$NoJbr,
+    [switch]$Jdwp,
+    [int]$JdwpPort = 5005,
     [string]$FlatWorldName = 'flatgate',
     [string]$RconPassword = 'ysmgate',
     [int]$RconPort      = 25575
@@ -31,8 +34,15 @@ param(
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 . "$PSScriptRoot\lib-env.ps1"
-$jdk = Use-Jdk25            # 26.1.2 will not configure under the machine default JDK 21
-Write-Host "[play] JAVA_HOME=$jdk"
+# 26.1.2 will not configure under the machine default JDK 21. Prefer JetBrains Runtime for
+# dev clients: its enhanced HotSwap lets method-body edits land without a restart.
+if ($Role -eq 'client' -and -not $NoJbr) {
+    $rt = Use-Jbr
+    Write-Host ("[play] JAVA_HOME={0} ({1})" -f $rt.Home, $(if ($rt.IsJbr) { 'JetBrains Runtime, HotSwap available' } else { 'stock JDK 25' }))
+} else {
+    $jdk = Use-Jdk25
+    Write-Host "[play] JAVA_HOME=$jdk"
+}
 if (-not [System.IO.Path]::IsPathRooted($LogDir)) { $LogDir = Join-Path $repoRoot $LogDir }
 if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir -Force | Out-Null }
 
@@ -96,6 +106,12 @@ if ($Role -eq 'server') {
     # The whole --args value is one argv element; without the embedded quotes
     # Start-Process splits on spaces and gradle reads "Alice" as a task name.
     $gradleArgs = @(':fabric:runClient', '--no-daemon', '--console=plain', "--args=`"$mcArgs`"")
+    if ($Jdwp) {
+        # Attach point for HotSwap: redefine method bodies in the running client instead of
+        # paying the restart. See tools/hotswap.ps1.
+        $env:YSM_DEBUG_JVM_ARGS = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:$JdwpPort"
+        Write-Host "[play] JDWP listening on port $JdwpPort once the client starts"
+    }
 }
 
 $gradlew = Join-Path $repoRoot 'gradlew.bat'

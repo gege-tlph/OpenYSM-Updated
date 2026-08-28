@@ -34,6 +34,7 @@ public class YsmWin {
     [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
     [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
     [DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr h, ref POINT p);
+    [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr h, IntPtr hdc, uint flags);
 
     [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }
     [StructLayout(LayoutKind.Sequential)] public struct POINT { public int X, Y; }
@@ -280,6 +281,45 @@ function Save-CroppedImage {
         $bmp.Dispose()
         return [pscustomobject]@{ Path = $Destination; Width = $ow; Height = $oh }
     } finally { $src.Dispose() }
+}
+
+function Save-WindowGrab {
+    <#
+      .SYNOPSIS Capture a window's pixels without needing it in the foreground.
+      .DESCRIPTION Fallback for when SetForegroundWindow is refused so F2 cannot be delivered.
+      PrintWindow with PW_RENDERFULLCONTENT usually works for GL windows; a black result means
+      it did not, and the caller should say so rather than archive an empty frame.
+    #>
+    param(
+        [Parameter(Mandatory)][IntPtr]$Hwnd,
+        [Parameter(Mandatory)][string]$Destination
+    )
+    Add-Type -AssemblyName System.Drawing
+    $r = New-Object YsmWin+RECT
+    [void][YsmWin]::GetWindowRect($Hwnd, [ref]$r)
+    $w = $r.Right - $r.Left; $h = $r.Bottom - $r.Top
+    if ($w -le 0 -or $h -le 0) { return $null }
+    $bmp = New-Object System.Drawing.Bitmap $w, $h
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $hdc = $g.GetHdc()
+    $ok = [YsmWin]::PrintWindow($Hwnd, $hdc, 2)   # 2 = PW_RENDERFULLCONTENT
+    $g.ReleaseHdc($hdc); $g.Dispose()
+    if (-not $ok) { $bmp.Dispose(); return $null }
+
+    # Reject an all-black grab instead of passing it off as evidence.
+    $sample = 0; $n = 0
+    for ($y = 0; $y -lt $h; $y += [Math]::Max(1, [int]($h / 20))) {
+        for ($x = 0; $x -lt $w; $x += [Math]::Max(1, [int]($w / 20))) {
+            $px = $bmp.GetPixel($x, $y); $sample += $px.R + $px.G + $px.B; $n += 3
+        }
+    }
+    if ($n -gt 0 -and ($sample / $n) -lt 4) { $bmp.Dispose(); return $null }
+
+    $dir = Split-Path -Parent $Destination
+    if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+    $bmp.Save($Destination, [System.Drawing.Imaging.ImageFormat]::Png)
+    $bmp.Dispose()
+    return $Destination
 }
 
 function Save-ContactSheet {

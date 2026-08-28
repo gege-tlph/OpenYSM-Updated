@@ -40,3 +40,38 @@ function Use-Jdk25 {
     $env:PATH = (Join-Path $home25 'bin') + ';' + $env:PATH
     return $home25
 }
+
+function Get-JbrHome {
+    <#
+      .SYNOPSIS Path of the JetBrains Runtime 25 install, or $null.
+      .DESCRIPTION JBR ships enhanced HotSwap ("DCEVM"), which lets a running dev client pick
+      up method-body edits without the ~40s-2min restart the acceptance loop otherwise pays.
+    #>
+    if ($env:YSM_JBR -and (Test-Path (Join-Path $env:YSM_JBR 'bin\java.exe'))) { return $env:YSM_JBR }
+    $root = Join-Path $env:USERPROFILE '.gradle\jdks'
+    if (-not (Test-Path $root)) { return $null }
+    $candidates = Get-ChildItem $root -Directory -Filter 'jbr*' -ErrorAction SilentlyContinue
+    foreach ($c in $candidates) {
+        $direct = Join-Path $c.FullName 'bin\java.exe'
+        if (Test-Path $direct) { return $c.FullName }
+        $nested = Get-ChildItem $c.FullName -Directory -ErrorAction SilentlyContinue |
+                  Where-Object { Test-Path (Join-Path $_.FullName 'bin\java.exe') } |
+                  Select-Object -First 1
+        if ($nested) { return $nested.FullName }
+    }
+    return $null
+}
+
+function Use-Jbr {
+    <#
+      .SYNOPSIS Point JAVA_HOME at JetBrains Runtime 25 if present, else fall back to any JDK 25.
+      .OUTPUTS The home that was selected, plus whether it is JBR.
+    #>
+    $jbr = Get-JbrHome
+    if ($jbr) {
+        $env:JAVA_HOME = $jbr
+        $env:PATH = (Join-Path $jbr 'bin') + ';' + $env:PATH
+        return [pscustomobject]@{ Home = $jbr; IsJbr = $true }
+    }
+    return [pscustomobject]@{ Home = (Use-Jdk25); IsJbr = $false }
+}

@@ -79,7 +79,17 @@ if (-not $shot -and $AllowPostMessage) {
     $shot = Wait-NewShot -Seconds $TimeoutSec
 }
 if (-not $shot) {
-    Write-Error "[capture] FAILED: no new PNG in $shotDir after two attempts."
+    # Focus was refused, so the game never saw F2. Grab the window's pixels directly; the
+    # identity of the client is still proven, since the hwnd came from its own process id.
+    Write-Host '[capture] falling back to a direct window grab (no foreground needed)'
+    $raw = Join-Path $env:TEMP ("ysm-grab-{0}.png" -f [Guid]::NewGuid().ToString('N'))
+    $grabbed = Save-WindowGrab -Hwnd $win.Hwnd -Destination $raw
+    if ($grabbed) {
+        $shot = Get-Item $grabbed
+    }
+}
+if (-not $shot) {
+    Write-Error "[capture] FAILED: no new PNG in $shotDir, and the direct window grab came back empty."
     exit 3
 }
 
