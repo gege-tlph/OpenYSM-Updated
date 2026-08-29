@@ -23,7 +23,12 @@ param(
     [double]$ClickNY = -1,
     [int]$HoldMs     = 60,
     [int]$GapMs      = 250,
-    [switch]$NoFocus
+    [switch]$NoFocus,
+    # Deliver keys with PostMessage instead of SendInput when the window cannot be raised.
+    # Needed whenever another app holds the foreground and Windows refuses to hand it over
+    # (e.g. a VMware Workstation window on this machine); SendInput would otherwise type into
+    # that window. Off by default: posting raw key messages once coincided with a GLFW crash.
+    [switch]$AllowPostMessage
 )
 
 $ErrorActionPreference = 'Stop'
@@ -35,15 +40,25 @@ if ([string]::IsNullOrWhiteSpace($Token)) { $Token = Split-Path -Leaf $GameDir }
 
 $win = Get-McWindow -Token $Token
 if (-not $win) { Write-Error "No Minecraft window found for token '$Token'."; exit 2 }
+$focused = $true
 if (-not $NoFocus) {
-    if (-not (Confirm-McForeground -Hwnd $win.Hwnd)) {
+    $focused = Confirm-McForeground -Hwnd $win.Hwnd
+    if (-not $focused) {
         Write-Host '[input] warning: window did not reach the foreground; input may go elsewhere'
     }
 }
+# Only post when focus actually failed: SendInput reaches the game the way a player does,
+# and is the preferred path whenever the window really is focused.
+$usePost = $AllowPostMessage -and -not $focused
+if ($usePost) { Write-Host '[input] foreground refused; delivering keys with PostMessage' }
 Write-Host "[input] token=$Token pid=$($win.ProcessId) hwnd=$($win.Hwnd)"
 
 foreach ($k in $Keys) {
-    Send-McKey -Name $k -HoldMs $HoldMs
+    if ($usePost) {
+        Send-McKey -Name $k -HoldMs $HoldMs -Hwnd $win.Hwnd -PostMessage
+    } else {
+        Send-McKey -Name $k -HoldMs $HoldMs
+    }
     Write-Host "[input] key $k (hold ${HoldMs}ms)"
     Start-Sleep -Milliseconds $GapMs
 }
@@ -71,6 +86,10 @@ if ($ClickNX -ge 0 -and $ClickNY -ge 0) {
     $ClickY = [int]($rect.Height * $ClickNY)
 }
 if ($ClickX -ge 0 -and $ClickY -ge 0) {
-    Send-McClick -Hwnd $win.Hwnd -X $ClickX -Y $ClickY
+    if ($usePost) {
+        Send-McClickPost -Hwnd $win.Hwnd -X $ClickX -Y $ClickY
+    } else {
+        Send-McClick -Hwnd $win.Hwnd -X $ClickX -Y $ClickY
+    }
     Write-Host "[input] click at client ($ClickX,$ClickY) of $($rect.Width)x$($rect.Height)"
 }

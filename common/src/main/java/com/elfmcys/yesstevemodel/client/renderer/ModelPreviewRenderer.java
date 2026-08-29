@@ -34,7 +34,20 @@ import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import com.mojang.blaze3d.vertex.QuadInstance;
+import net.minecraft.core.Direction;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import java.util.ArrayList;
 import org.joml.Matrix4fStack;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -52,6 +65,16 @@ public final class ModelPreviewRenderer {
     private static boolean isExtraPlayerMode = false;
 
     private static boolean isFirstPersonMode = false;
+
+    /** Fixed so the preview scenery does not reshuffle its random model variants every frame. */
+    private static final long PREVIEW_MODEL_SEED = 42L;
+
+    /** Tint index 0 = foliage/grass colour; a preview has no biome to sample. */
+    private static final int[] PREVIEW_TINTS = {0xFF000000 | GrassColor.getDefaultColor()};
+
+    /** The six faces plus vanilla's null "unculled" bucket, in vanilla's own order. */
+    private static final Direction[] PREVIEW_QUAD_DIRECTIONS =
+            {Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, null};
 
     public static void setPreviewMode(boolean previewMode) {
         isPreviewMode = previewMode;
@@ -564,36 +587,117 @@ public final class ModelPreviewRenderer {
         }
     }
 
+    /**
+     * The 3x3 grass patch with a short grass and a tulip on it, behind the previewed model.
+     *
+     * <p>26.1.2 removed {@code BlockRenderDispatcher#renderSingleBlock}: block geometry is now
+     * submitted to the collector and drawn by {@code BlockFeatureRenderer} in a later phase.
+     * The parts list has to be copied because {@code collectParts} fills a caller-owned list
+     * and the submitted node is read after this method returns.
+     */
     private static void renderGroundScenery(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, float yaw) {
-        // scenery migration is tracked separately; do not block entity rendering on it.
+        poseStack.pushPose();
+        poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
+        poseStack.translate(-1.5d, -1.0d, -2.5d);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                poseStack.translate(0.0f, 0.0f, 1.0f);
+                renderPreviewBlock(Blocks.GRASS_BLOCK.defaultBlockState(), poseStack, bufferSource, packedLight);
+            }
+            poseStack.translate(1.0f, 0.0f, -3.0f);
+        }
+        poseStack.translate(-1.0f, 1.0f, 1.0f);
+        renderPreviewBlock(Blocks.SHORT_GRASS.defaultBlockState(), poseStack, bufferSource, packedLight);
+        poseStack.translate(0.0f, 0.0f, 1.0f);
+        renderPreviewBlock(Blocks.RED_TULIP.defaultBlockState(), poseStack, bufferSource, packedLight);
+        poseStack.popPose();
     }
 
+    /**
+     * Draws one block state's model at the current pose, into the preview's own buffer source.
+     *
+     * <p>26.1.2 removed {@code BlockRenderDispatcher#renderSingleBlock}. The obvious replacement
+     * is {@code SubmitNodeCollector#submitBlockModel}, but block nodes submitted inside the GUI
+     * entity pass are not drawn by it: they surfaced in the world behind the screen instead of
+     * inside the preview's scissor rect (observed 2026-08-29). Writing the quads into the
+     * BufferSource the scenery callback is handed keeps them in the preview, which is also how
+     * the vehicle scenery beside this already works.
+     *
+     * <p>The render type comes from each quad's own {@code MaterialInfo#layer()} rather than a
+     * per-block guess, so a block whose model mixes layers still comes out right.
+     *
+     * <p>Tints are indexed by {@code MaterialInfo#tintIndex()}. A preview has no biome, so grass
+     * takes {@link GrassColor#getDefaultColor()} - the same fallback the old renderSingleBlock
+     * path got from BlockColors with a null level. Without it the greyscale grass textures
+     * render white.
+     */
+    private static void renderPreviewBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        BlockStateModel model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(blockState);
+        if (model == null) {
+            return;
+        }
+        List<BlockStateModelPart> parts = new ArrayList<>();
+        model.collectParts(RandomSource.create(PREVIEW_MODEL_SEED), parts);
+        if (parts.isEmpty()) {
+            return;
+        }
+        PoseStack.Pose pose = poseStack.last();
+        QuadInstance quadInstance = new QuadInstance();
+        quadInstance.setLightCoords(packedLight);
+        quadInstance.setOverlayCoords(OverlayTexture.NO_OVERLAY);
+        for (BlockStateModelPart part : parts) {
+            for (Direction direction : PREVIEW_QUAD_DIRECTIONS) {
+                // null is vanilla's "unculled quads" bucket - the cross models the plants use
+                // live entirely in it, so skipping it would draw nothing for them.
+                for (BakedQuad quad : part.getQuads(direction)) {
+                    BakedQuad.MaterialInfo materialInfo = quad.materialInfo();
+                    int tintIndex = materialInfo.tintIndex();
+                    quadInstance.setColor(tintIndex >= 0 && tintIndex < PREVIEW_TINTS.length
+                            ? PREVIEW_TINTS[tintIndex]
+                            : -1);
+                    bufferSource.getBuffer(movingBlockRenderType(materialInfo.layer()))
+                            .putBakedQuad(pose, quad, quadInstance);
+                }
+            }
+        }
+    }
+
+    private static RenderType movingBlockRenderType(ChunkSectionLayer layer) {
+        return switch (layer) {
+            case CUTOUT -> RenderTypes.cutoutMovingBlock();
+            case TRANSLUCENT -> RenderTypes.translucentMovingBlock();
+            default -> RenderTypes.solidMovingBlock();
+        };
+    }
+
+    /**
+     * The bed under the model when the "sleep" animation is selected.
+     *
+     * <p>The bed's block model carries no geometry - {@code block/bed.json} has only a particle
+     * texture - so a block-model submit draws nothing. The real geometry lives in
+     * {@code BedRenderer}, reached through {@code BedSpecialRenderer}. The bed ITEM resolves to
+     * exactly that special renderer, so going through the item pipeline gets the geometry
+     * without having to construct a BedSpecialRenderer (which needs a BedRenderer, a SpriteId
+     * and a BedPart) by hand. {@code ItemDisplayContext.NONE} applies no display transform, so
+     * the bed lands at the pose set here rather than at an item-in-hand offset.
+     */
     private static void renderBedScenery(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, float yaw) {
-        /* 床画不出来的成因：床的**方块模型是空的**——assets/minecraft/models/block/bed.json 里
-        // 只有一个 particle 贴图，没有任何 elements 几何（已在 1.21.11 的 jar 里实证）。
-        // 所以 renderSingleBlock 对床是彻底的空操作，与 render shape 无关
-        // （1.21.11 的 RenderShape 只剩 INVISIBLE / MODEL，床走的是 MODEL）。
-        // 床的真实几何在 BedRenderer 里，对外经 BedSpecialRenderer 暴露，
-        // 由 SpecialBlockModelRenderer.renderByBlock 提交——这正是 README「已知问题」里
-        // sleep 那一半的成因，且它在 1.20.1 基准上同样存在（基准也是 renderSingleBlock）。
         SubmitNodeCollector collector = RenderContext.collector();
-        if (collector == null) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (collector == null || minecraft.level == null) {
+            return;
+        }
+        ItemStackRenderState renderState = new ItemStackRenderState();
+        minecraft.getItemModelResolver().updateForTopItem(renderState, new ItemStack(Blocks.RED_BED),
+                ItemDisplayContext.NONE, minecraft.level, null, 0);
+        if (renderState.isEmpty()) {
             return;
         }
         poseStack.pushPose();
         poseStack.mulPose(Axis.YP.rotationDegrees(yaw + 180.0f));
         poseStack.translate(-0.5d, 0.0d, 0.5d);
-        // 末三个 int 依次是 light / overlay / color（字节码实证：renderByBlock 转发给
-        // SpecialModelRenderer.submit(data, ctx, pose, collector, light, overlay, glint=false, color)）。
-        Minecraft.getInstance().getModelManager().specialBlockModelRenderer().renderByBlock(
-                Blocks.RED_BED,
-                ItemDisplayContext.NONE,
-                poseStack,
-                collector,
-                packedLight,
-                OverlayTexture.NO_OVERLAY,
-                -1);
-        poseStack.popPose(); */
+        renderState.submit(poseStack, collector, packedLight, OverlayTexture.NO_OVERLAY, -1);
+        poseStack.popPose();
     }
 
     /** 取（并缓存）用于预览摆拍的载具实体；拿不到就返回 null，调用方自行降级。 */

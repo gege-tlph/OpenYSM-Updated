@@ -10,6 +10,8 @@ import com.elfmcys.yesstevemodel.geckolib3.geo.GeoLayerRenderer;
 import com.elfmcys.yesstevemodel.geckolib3.geo.animated.AnimatedGeoModel;
 import com.elfmcys.yesstevemodel.geckolib3.util.RenderUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import net.minecraft.client.model.object.equipment.ElytraModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -54,7 +56,15 @@ public class CustomPlayerElytraLayer extends GeoLayerRenderer<CustomPlayerEntity
 //            poseStack.translate(0.0d, 1.5d, 0.0d);
             poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
             this.elytraModel.setupAnim(state);
-            this.elytraModel.renderToBuffer(poseStack, bufferSource.getBuffer(RenderTypes.armorCutoutNoCull(cloakTextureLocation)), packedLightIn, OverlayTexture.NO_OVERLAY, -1);
+            // 26.1.2 removed ItemRenderer#getFoilBuffer, which used to wrap the base buffer with
+            // the glint buffer when the stack had foil. Rebuild that here rather than dropping
+            // the glint: an enchanted elytra or cape has to keep its shimmer on the replacement
+            // model, or it looks wrong next to a vanilla player wearing the same item.
+            VertexConsumer elytraBuffer = bufferSource.getBuffer(RenderTypes.armorCutoutNoCull(cloakTextureLocation));
+            if (stack.hasFoil()) {
+                elytraBuffer = VertexMultiConsumer.create(bufferSource.getBuffer(RenderTypes.armorEntityGlint()), elytraBuffer);
+            }
+            this.elytraModel.renderToBuffer(poseStack, elytraBuffer, packedLightIn, OverlayTexture.NO_OVERLAY, -1);
             poseStack.popPose();
         }
     }

@@ -35,6 +35,10 @@ public class YsmWin {
     [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
     [DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr h, ref POINT p);
     [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr h, IntPtr hdc, uint flags);
+    [DllImport("user32.dll")] public static extern bool SystemParametersInfo(uint action, uint param, IntPtr vparam, uint winini);
+    [DllImport("user32.dll")] public static extern void SwitchToThisWindow(IntPtr h, bool altTab);
+    [DllImport("user32.dll")] public static extern IntPtr SetActiveWindow(IntPtr h);
+    [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
 
     [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }
     [StructLayout(LayoutKind.Sequential)] public struct POINT { public int X, Y; }
@@ -43,6 +47,17 @@ public class YsmWin {
 }
 
 $script:SW_RESTORE            = 9
+$script:WM_MOUSEMOVE          = 0x0200
+$script:WM_LBUTTONDOWN        = 0x0201
+$script:WM_LBUTTONUP          = 0x0202
+$script:MK_LBUTTON            = 0x0001
+$script:SPI_SETFOREGROUNDLOCKTIMEOUT = 0x2001
+$script:SPIF_SENDCHANGE       = 0x02
+$script:HWND_TOPMOST          = [IntPtr](-1)
+$script:HWND_NOTOPMOST        = [IntPtr](-2)
+$script:SWP_NOMOVE            = 0x0002
+$script:SWP_NOSIZE            = 0x0001
+$script:SWP_SHOWWINDOW        = 0x0040
 $script:KEYEVENTF_KEYUP       = 0x0002
 $script:MOUSEEVENTF_LEFTDOWN  = 0x0002
 $script:MOUSEEVENTF_LEFTUP    = 0x0004
@@ -119,20 +134,47 @@ function Set-McForeground {
     <#  .SYNOPSIS Raise a window past the Windows foreground lock. #>
     param([Parameter(Mandatory)][IntPtr]$Hwnd)
 
+    # Windows refuses SetForegroundWindow from a process that does not already own the
+    # foreground, and silently returns false. Clearing SPI_SETFOREGROUNDLOCKTIMEOUT is what
+    # actually lifts that; without it every strategy below fails on a background session and
+    # keystrokes land in whatever window does have focus.
+    [void][YsmWin]::SystemParametersInfo($script:SPI_SETFOREGROUNDLOCKTIMEOUT, 0, [IntPtr]::Zero,
+                                         $script:SPIF_SENDCHANGE)
+
     [void][YsmWin]::ShowWindow($Hwnd, $script:SW_RESTORE)
     [void][YsmWin]::BringWindowToTop($Hwnd)
-    if ([YsmWin]::SetForegroundWindow($Hwnd)) { Start-Sleep -Milliseconds 250; return $true }
+    if ([YsmWin]::SetForegroundWindow($Hwnd)) {
+        Start-Sleep -Milliseconds 250
+        if ([YsmWin]::GetForegroundWindow() -eq $Hwnd) { return $true }
+    }
 
-    # Foreground lock: attach our input queue to the target window's thread.
-    $fg = [YsmWin]::GetForegroundWindow()
+    # Attach OUR input queue to the thread that currently owns the foreground - that is the
+    # pair that matters. (Attaching the foreground thread to the target thread, as this used
+    # to, leaves our own thread unattached and the call still refused.)
     $dummy = 0
-    $fgThread = [YsmWin]::GetWindowThreadProcessId($fg, [ref]$dummy)
-    $tgThread = [YsmWin]::GetWindowThreadProcessId($Hwnd, [ref]$dummy)
-    [void][YsmWin]::AttachThreadInput([uint32]$fgThread, [uint32]$tgThread, $true)
-    $ok = [YsmWin]::SetForegroundWindow($Hwnd)
-    [void][YsmWin]::AttachThreadInput([uint32]$fgThread, [uint32]$tgThread, $false)
+    $ourThread = [YsmWin]::GetCurrentThreadId()
+    $fgThread = [YsmWin]::GetWindowThreadProcessId([YsmWin]::GetForegroundWindow(), [ref]$dummy)
+    $attached = $false
+    if ($fgThread -ne 0 -and [uint32]$fgThread -ne $ourThread) {
+        $attached = [YsmWin]::AttachThreadInput($ourThread, [uint32]$fgThread, $true)
+    }
+    try {
+        [void][YsmWin]::SetWindowPos($Hwnd, $script:HWND_TOPMOST, 0, 0, 0, 0,
+                                     $script:SWP_NOMOVE -bor $script:SWP_NOSIZE -bor $script:SWP_SHOWWINDOW)
+        [void][YsmWin]::SetWindowPos($Hwnd, $script:HWND_NOTOPMOST, 0, 0, 0, 0,
+                                     $script:SWP_NOMOVE -bor $script:SWP_NOSIZE -bor $script:SWP_SHOWWINDOW)
+        [void][YsmWin]::SetForegroundWindow($Hwnd)
+        [void][YsmWin]::SetActiveWindow($Hwnd)
+    } finally {
+        if ($attached) { [void][YsmWin]::AttachThreadInput($ourThread, [uint32]$fgThread, $false) }
+    }
     Start-Sleep -Milliseconds 250
-    return $ok
+    if ([YsmWin]::GetForegroundWindow() -eq $Hwnd) { return $true }
+
+    # Last resort: the shell's own alt-tab entry point, which is exempt from the lock.
+    [YsmWin]::SwitchToThisWindow($Hwnd, $true)
+    Start-Sleep -Milliseconds 250
+    return ([YsmWin]::GetForegroundWindow() -eq $Hwnd)
 }
 
 function Confirm-McForeground {
@@ -213,6 +255,27 @@ function Send-McClick {
     [YsmWin]::mouse_event($script:MOUSEEVENTF_LEFTDOWN, 0, 0, 0, [UIntPtr]::Zero)
     Start-Sleep -Milliseconds 60
     [YsmWin]::mouse_event($script:MOUSEEVENTF_LEFTUP, 0, 0, 0, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 200
+}
+
+function Send-McClickPost {
+    <#
+      .SYNOPSIS Click at client coordinates by posting mouse messages - no foreground needed.
+      .DESCRIPTION SetCursorPos/mouse_event move the REAL cursor and land wherever focus is, so
+      they are unusable when Windows refuses to raise the game window. Posting the messages
+      addresses the target window directly. lParam packs the client-area point as (y<<16)|x.
+    #>
+    param(
+        [Parameter(Mandatory)][IntPtr]$Hwnd,
+        [Parameter(Mandatory)][int]$X,
+        [Parameter(Mandatory)][int]$Y
+    )
+    $lp = [IntPtr](($Y -shl 16) -bor ($X -band 0xFFFF))
+    [void][YsmWin]::PostMessage($Hwnd, $script:WM_MOUSEMOVE,   [IntPtr]::Zero, $lp)
+    Start-Sleep -Milliseconds 120
+    [void][YsmWin]::PostMessage($Hwnd, $script:WM_LBUTTONDOWN, [IntPtr]$script:MK_LBUTTON, $lp)
+    Start-Sleep -Milliseconds 80
+    [void][YsmWin]::PostMessage($Hwnd, $script:WM_LBUTTONUP,   [IntPtr]::Zero, $lp)
     Start-Sleep -Milliseconds 200
 }
 
