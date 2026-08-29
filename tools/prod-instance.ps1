@@ -19,8 +19,8 @@
 
   Usage:
     .\tools\prod-instance.ps1                       # build/refresh the instance
+    .\tools\prod-instance.ps1 -Mods 'fabric\build\libs\openysm-fabric-2.7.0.0.jar','C:\mods\iris.jar'
     .\tools\prod-instance.ps1 -Launch -Server localhost:25565
-    .\tools\prod-instance.ps1 -Launch -Mods 'iris,sodium'
 #>
 [CmdletBinding()]
 param(
@@ -35,7 +35,11 @@ param(
     [string]$WaitFor       = '',
     [int]$TimeoutSec       = 420,
     [string]$LogDir        = 'tools-logs',
-    [string]$LogName       = 'prod'
+    [string]$LogName       = 'prod',
+    # Mod jars to install into the instance. Third-party co-installation acceptance is
+    # this script's whole purpose, so putting them there must not be a manual step.
+    [string[]]$Mods        = @(),
+    [switch]$ClearMods
 )
 
 $ErrorActionPreference = 'Stop'
@@ -101,14 +105,26 @@ function Find-LocalCopy([string]$RelativePath) {
     return $null
 }
 
-function Save-File([string]$Url, [string]$Destination, [string]$RelativePath = '') {
+function Test-Sha1([string]$Path, [string]$Expected) {
+    if ([string]::IsNullOrWhiteSpace($Expected)) { return $true }   # nothing to check against
+    return (Get-FileHash -Path $Path -Algorithm SHA1).Hash -ieq $Expected
+}
+
+function Save-File([string]$Url, [string]$Destination, [string]$RelativePath = '', [string]$Sha1 = '') {
     if (Test-Path $Destination) { return $false }
     $dir = Split-Path -Parent $Destination
     New-Item -ItemType Directory -Path $dir -Force | Out-Null
 
+    # A cache hit is matched by leaf filename, and distinct coordinates can share one
+    # (annotations-*.jar, asm-*.jar). This instance exists to overrule a dev-run finding
+    # about mod compatibility, so a silently wrong jar would make the witness unsound in
+    # exactly the direction it is trusted. Verify against Mojang's sha1 before accepting.
     if ($RelativePath -ne '') {
         $local = Find-LocalCopy $RelativePath
-        if ($local) { Copy-Item $local $Destination -Force; return $true }
+        if ($local) {
+            if (Test-Sha1 $local $Sha1) { Copy-Item $local $Destination -Force; return $true }
+            Write-Host "[prod] cache copy rejected (sha1 mismatch): $local"
+        }
     }
 
     # Invoke-WebRequest renders a progress bar per chunk in PS 5.1, which dominates
@@ -120,6 +136,10 @@ function Save-File([string]$Url, [string]$Destination, [string]$RelativePath = '
         for ($attempt = 1; $attempt -le 3; $attempt++) {
             try {
                 Invoke-WebRequest -Uri $Url -OutFile $tmp -UseBasicParsing -TimeoutSec 300
+                if (-not (Test-Sha1 $tmp $Sha1)) {
+                    Remove-Item $tmp -Force -ErrorAction SilentlyContinue
+                    throw "sha1 mismatch for $Url"
+                }
                 Move-Item $tmp $Destination -Force
                 return $true
             } catch {
@@ -166,7 +186,7 @@ foreach ($lib in $vanilla.libraries) {
     if (-not (Test-LibraryRules $lib)) { continue }
     if (-not $lib.downloads -or -not $lib.downloads.artifact) { continue }
     $dest = Join-Path $libDir ($lib.downloads.artifact.path -replace '/', '\')
-    if (Save-File $lib.downloads.artifact.url $dest $lib.downloads.artifact.path) { $fetched++ }
+    if (Save-File $lib.downloads.artifact.url $dest $lib.downloads.artifact.path $lib.downloads.artifact.sha1) { $fetched++ }
     $classpath.Add($dest)
 }
 Write-Host "[prod] vanilla libraries: $($classpath.Count) on classpath, $fetched newly downloaded"
@@ -228,6 +248,22 @@ if (-not (Test-Path $objectsLink)) {
 $gameDir = Join-Path $Root 'game'
 New-Item -ItemType Directory -Path (Join-Path $gameDir 'mods') -Force | Out-Null
 & "$PSScriptRoot\prepare-client-dir.ps1" -GameDir $gameDir | Out-Null
+
+# --- 6b. mods ------------------------------------------------------------------
+$modsDir = Join-Path $gameDir 'mods'
+if ($ClearMods) {
+    Get-ChildItem "$modsDir\*.jar" -ErrorAction SilentlyContinue | Remove-Item -Force
+    Write-Host "[prod] mods dir cleared"
+}
+foreach ($mod in $Mods) {
+    $modPath = $mod
+    if (-not [System.IO.Path]::IsPathRooted($modPath)) { $modPath = Join-Path $repoRoot $modPath }
+    if (-not (Test-Path $modPath)) { Write-Error "[prod] mod jar not found: $modPath"; exit 4 }
+    Copy-Item $modPath $modsDir -Force
+    Write-Host ("[prod] mod installed: {0}" -f (Split-Path -Leaf $modPath))
+}
+$installed = @(Get-ChildItem "$modsDir\*.jar" -ErrorAction SilentlyContinue)
+Write-Host ("[prod] mods present: {0}" -f $(if ($installed.Count) { ($installed | ForEach-Object { $_.Name }) -join ', ' } else { '(none)' }))
 
 $cpFile = Join-Path $Root 'classpath.txt'
 $classpath -join [IO.Path]::PathSeparator | Set-Content $cpFile -Encoding utf8

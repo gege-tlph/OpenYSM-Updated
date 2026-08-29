@@ -76,8 +76,18 @@ Add-Result 'G0' 'no sparkle_morpher in sources' ($leaks.Count -eq 0) ("{0} hit(s
 $donorPkg = @(& git grep -n 'com\.micaftic' -- 'common/src' 'fabric/src' 2>$null)
 Add-Result 'G0' 'no donor package refs' ($donorPkg.Count -eq 0) ("{0} hit(s)" -f $donorPkg.Count)
 
-$exclusions = @(Select-String -Path (Join-Path $repoRoot 'fabric\build.gradle') -Pattern "java\.exclude" -ErrorAction SilentlyContinue)
-Add-Result 'G0' 'source exclusions == 1 (TLM)' ($exclusions.Count -eq 1) ("{0} found" -f $exclusions.Count)
+# Match the excluded PATTERNS, not the number of exclude statements: `java.exclude 'a', 'b'`
+# and the block form `java { exclude 'x' }` both widen the set without adding a second
+# `java.exclude` token, so counting statements would let the widening CLAUDE.md forbids
+# through. The one sanctioned exclusion is the frozen TLM tree.
+$buildGradle = Get-Content (Join-Path $repoRoot 'fabric\build.gradle') -Raw
+$excludePatterns = @([regex]::Matches($buildGradle, "exclude\s+((?:'[^']*'|""[^""]*"")(?:\s*,\s*(?:'[^']*'|""[^""]*""))*)") |
+    ForEach-Object { $_.Groups[1].Value -split '\s*,\s*' } |
+    ForEach-Object { $_.Trim("'", '"') })
+$sanctioned = @('rip/ysm/compat/touhoulittlemaid/fabric/tlm/**')
+$unexpected = @($excludePatterns | Where-Object { $sanctioned -notcontains $_ })
+Add-Result 'G0' 'source exclusions == 1 (TLM)' ($excludePatterns.Count -eq 1 -and $unexpected.Count -eq 0) `
+    ("{0} pattern(s){1}" -f $excludePatterns.Count, $(if ($unexpected.Count) { ": unexpected " + ($unexpected -join ', ') } else { '' }))
 
 $junk = @(Get-ChildItem -Path (Join-Path $repoRoot 'common\src'), (Join-Path $repoRoot 'fabric\src') -Recurse -File -ErrorAction SilentlyContinue |
           Where-Object { $_.Extension -in '.orig', '.rej', '.bak' -or ($_.Extension -eq '.java' -and $_.Length -eq 0) })
@@ -85,16 +95,17 @@ Add-Result 'G0' 'no backup/empty source files' ($junk.Count -eq 0) ("{0} found" 
 
 if (-not $SkipGradle) {
     Write-Host "== G1 JVM contract tests ==" -ForegroundColor Cyan
-    $g1 = Invoke-Gradle -Name 'gate-g1-test' -Tasks @(':common:test', ':fabric:test')
+    # cleanTest first: without it Gradle reports the test tasks UP-TO-DATE, writes no new
+    # XML, and the tally below would be satisfied by the PREVIOUS run's results - a gate
+    # that passes while nothing ran. This gate's PASS is recorded as evidence, so it has to
+    # mean "these tests executed just now".
+    $g1 = Invoke-Gradle -Name 'gate-g1-test' -Tasks @(':common:cleanTest', ':fabric:cleanTest', ':common:test', ':fabric:test')
     $g1Ok = $g1.ExitCode -eq 0
-    # A green test task is not proof tests exist: count the result XML too.
-    # (Gradle may report UP-TO-DATE and write no new files, so age is reported
-    # for information but is not the pass condition; failOnNoDiscoveredTests=true
-    # in fabric/build.gradle is what rejects an empty test source set.)
     $xml = @(Get-ChildItem -Path (Join-Path $repoRoot 'common\build\test-results\test'), (Join-Path $repoRoot 'fabric\build\test-results\test') -Filter 'TEST-*.xml' -Recurse -ErrorAction SilentlyContinue)
     $freshXml = @($xml | Where-Object { $_.LastWriteTime -ge $runStart })
+    # Tally ONLY this run's files; stale results must never contribute.
     $testCount = 0; $failCount = 0
-    foreach ($f in $xml) {
+    foreach ($f in $freshXml) {
         try {
             [xml]$doc = Get-Content $f.FullName -Raw
             $testCount += [int]$doc.testsuite.tests
@@ -102,7 +113,7 @@ if (-not $SkipGradle) {
         } catch { }
     }
     Add-Result 'G1' 'gradle :common:test :fabric:test' $g1Ok ("exit {0} {1}" -f $g1.ExitCode, $g1.Reason)
-    Add-Result 'G1' 'tests actually executed' ($testCount -gt 0 -and $failCount -eq 0) ("{0} tests, {1} failed, {2}/{3} result files from this run" -f $testCount, $failCount, $freshXml.Count, $xml.Count)
+    Add-Result 'G1' 'tests actually executed' ($freshXml.Count -gt 0 -and $testCount -gt 0 -and $failCount -eq 0) ("{0} tests, {1} failed, {2} result files from this run (of {3} on disk)" -f $testCount, $failCount, $freshXml.Count, $xml.Count)
 
     Write-Host "== G2 compile and package ==" -ForegroundColor Cyan
     $g2 = Invoke-Gradle -Name 'gate-g2-build' -Tasks @(':fabric:build')

@@ -34,7 +34,10 @@ public class WorldRendererMixin {
     ) {
         if (YesSteveModel.isAvailable()) {
             ModelPreviewRenderer.setFirstPersonMode(true);
-            EntityRenderCache.tick(deltaTracker.getGameTimeDeltaPartialTick(false));
+            // true = ignore the frozen flag. With false, a frozen world tick makes this return a
+            // hard 1.0f every frame, so cached models keep animating a full tick per frame
+            // while everything else is stopped (/tick freeze).
+            EntityRenderCache.tick(deltaTracker.getGameTimeDeltaPartialTick(true));
         }
     }
 

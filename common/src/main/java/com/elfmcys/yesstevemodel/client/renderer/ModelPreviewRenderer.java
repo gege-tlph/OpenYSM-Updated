@@ -77,6 +77,18 @@ public final class ModelPreviewRenderer {
         return isFirstPersonMode || OculusCompat.isPBRActive() || FirstPersonCompat.isFirstPersonActive();
     }
 
+    /**
+     * The raw flag, without the Oculus/first-person-mod terms {@link #isFirstPerson()} folds in.
+     *
+     * <p>Use this - never {@code isFirstPerson()} - when saving the value to restore later.
+     * {@link #setFirstPersonMode(boolean)} writes only this field, so saving the derived
+     * predicate and restoring it through the setter latches the flag on for the rest of the
+     * frame whenever a compat mod contributed the {@code true}.
+     */
+    public static boolean isFirstPersonModeRaw() {
+        return isFirstPersonMode;
+    }
+
     public static boolean isFirstPersonOnRenderThread() {
         RenderSystem.assertOnRenderThread();
         return isFirstPersonMode && !FirstPersonCompat.isFirstPersonActive();

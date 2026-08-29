@@ -6,7 +6,6 @@ import com.elfmcys.yesstevemodel.capability.StarModelsCapability;
 import com.elfmcys.yesstevemodel.model.ServerModelManager;
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
 import net.minecraft.network.FriendlyByteBuf;
-import dev.architectury.utils.GameInstance;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import rip.ysm.api.network.PacketContext;
@@ -63,7 +62,9 @@ public class C2SVersionCheckPacket {
      * never becomes dirty.
      */
     private static void syncOnlineRosterTo(ServerPlayer sender) {
-        MinecraftServer server = GameInstance.getServer();
+        // ServerPlayer#level() is typed ServerLevel in 26.1.2, so the owning server comes
+        // straight from the packet context - no global lookup needed.
+        MinecraftServer server = sender.level().getServer();
         if (server == null) {
             return;
         }
@@ -71,8 +72,16 @@ public class C2SVersionCheckPacket {
             if (other == sender) {
                 continue;
             }
+            // fullSync=false. The outgoing message is rebuilt from `other` either way, but
+            // fullSync=true additionally calls PlayerStateSynchronizer#buildFullSyncMessage's
+            // syncMessage.reset(), which clears that player's *shared* accumulator - the
+            // flags, effect amplifiers and molang vars queued by syncEffectAdded and friends
+            // that have not been flushed yet. CapabilityEvent#onServerTick can afford the
+            // reset because it immediately rebroadcasts to tracking players and self; here we
+            // send only to the joiner, so resetting would silently drop everyone else's
+            // pending state until something re-dirtied them.
             ModelInfoCapability.get(other).ifPresent(otherCap ->
-                    otherCap.createSyncMessage(other, true)
+                    otherCap.createSyncMessage(other, false)
                             .ifPresent(message -> NetworkHandler.sendToClientPlayer(message, sender)));
         }
         ModelInfoCapability.get(sender).ifPresent(ModelInfoCapability::markDirty);

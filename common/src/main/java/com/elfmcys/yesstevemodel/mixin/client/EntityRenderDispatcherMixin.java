@@ -63,6 +63,13 @@ public abstract class EntityRenderDispatcherMixin implements IEntityRenderDispat
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         int packedLight = state.lightCoords;
 
+        // Only the fishing-hook path still writes straight into the shared BufferSource (the
+        // line, RenderTypes.lines()); everything else here goes through the 26.1 collector.
+        // The flush below is scoped to it deliberately: draining the shared buffer for every
+        // entity in view - including the ones we decline to touch - would break vanilla's own
+        // batching and emit its queued geometry at a point mid-submit that vanilla did not
+        // choose. Same lesson as the vehicle gate below, one level up.
+        boolean drewImmediateGeometry = false;
         RenderContext.enter(collector, cameraState);
         try {
             if (entity instanceof Projectile projectile) {
@@ -70,6 +77,7 @@ public abstract class EntityRenderDispatcherMixin implements IEntityRenderDispat
                     boolean callOriginal;
                     if (projectile instanceof FishingHook fishingHook) {
                         callOriginal = CustomFishingHookRenderer.tryRenderCustomHook(fishingHook, state, partialTick, poseStack, bufferSource, packedLight);
+                        drewImmediateGeometry = true;
                     } else {
                         callOriginal = CustomProjectileRenderer.renderProjectile(projectile, state, partialTick, poseStack, bufferSource, packedLight);
                     }
@@ -96,12 +104,10 @@ public abstract class EntityRenderDispatcherMixin implements IEntityRenderDispat
             }
             return true;
         } finally {
-            // Vehicle/projectile/fishing-hook models are submitted through the 26.1
-            // collector (IGeoRenderer#renderWithBoneAndRenderType); this flush only covers
-            // whatever legacy immediate-mode drawing those renderers still do around the
-            // model itself. Skip the Oculus shadow pass to avoid the shadow-map culling
-            // flicker an unconditional flush caused there.
-            if (!OculusCompat.isRenderingShadowPass()) {
+            // Flush only when we actually queued immediate-mode geometry, so the fishing line
+            // is not stranded in the batch. Skip the Oculus shadow pass: flushing there makes
+            // some shader packs cull player geometry out of the shadow map (2026-05-15).
+            if (drewImmediateGeometry && !OculusCompat.isRenderingShadowPass()) {
                 bufferSource.endBatch();
             }
             RenderContext.exit();

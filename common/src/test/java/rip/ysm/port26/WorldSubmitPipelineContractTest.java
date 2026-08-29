@@ -63,14 +63,37 @@ class WorldSubmitPipelineContractTest {
     @Test
     void legacyLayerFlushKeepsSkippingTheShadowPass() throws Exception {
         for (String path : new String[]{PLAYER_EVENT, DISPATCHER_MIXIN}) {
-            String source = read(path);
-            if (!source.contains("endBatch()")) {
-                continue;   // fully migrated away from immediate mode: nothing to guard
+            // Comments in both files discuss the shadow pass at length, so a file-wide
+            // substring search is satisfied by the prose alone - it would still pass with the
+            // guard inverted, which is exactly the defect that shipped in 62c4257. Strip
+            // comments and check the condition that actually encloses each endBatch() call.
+            String source = stripComments(read(path));
+            int from = 0;
+            int guarded = 0;
+            while (true) {
+                int call = source.indexOf("endBatch()", from);
+                if (call < 0) {
+                    break;
+                }
+                int ifStart = source.lastIndexOf("if (", call);
+                assertTrue(ifStart >= 0, path + ": endBatch() is not inside any if - flushing the "
+                        + "shared BufferSource unconditionally breaks the Oculus shadow pass");
+                String condition = source.substring(ifStart, call);
+                assertTrue(condition.contains("!OculusCompat.isRenderingShadowPass()"),
+                        path + ": flushing the shared BufferSource during the Oculus shadow pass "
+                                + "makes shader packs cull player geometry out of the shadow map "
+                                + "(2026-05-15, 62c4257). The guard must SKIP the shadow pass, not "
+                                + "select it. Enclosing condition was: " + condition.trim());
+                guarded++;
+                from = call + 1;
             }
-            assertTrue(source.contains("!OculusCompat.isRenderingShadowPass()"),
-                    path + ": flushing the shared BufferSource during the Oculus shadow pass caused "
-                            + "shadow-map culling to drop geometry (2026-05-15, 62c4257); the guard "
-                            + "must skip the shadow pass, not select it");
+            assertTrue(guarded > 0 || !source.contains("endBatch"),
+                    path + ": expected either a guarded endBatch() or none at all");
         }
+    }
+
+    /** Removes block and line comments so assertions see code, not prose about the code. */
+    private static String stripComments(String source) {
+        return source.replaceAll("(?s)/\\*.*?\\*/", " ").replaceAll("(?m)//.*$", " ");
     }
 }

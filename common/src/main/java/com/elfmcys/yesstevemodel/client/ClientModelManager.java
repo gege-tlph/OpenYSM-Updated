@@ -383,7 +383,11 @@ public class ClientModelManager {
                 outBuf.writeVarLong(h.hash2);
             }
 
-            YsmCrypt.EncryptedPacket result = YsmCrypt.encrypt(outBuf.toArray(), key1, true);
+            // appendNextKey=false: packet 0x04 carries no trailing key material. The server's
+            // step==2 handler reads varint+hashes to the end of the plaintext and does not strip
+            // a 56-byte tail the way the step==1 handler does, so appending one would corrupt
+            // the request and drop a key we never store. Matches the 1.21.11 wire format.
+            YsmCrypt.EncryptedPacket result = YsmCrypt.encrypt(outBuf.toArray(), key1, false);
             sendModelFile(ByteBuffer.wrap(result.data()));
         }
 
@@ -769,7 +773,7 @@ public class ClientModelManager {
     private static void onModelDataReceived(@Nullable ClientModelInfo parsedBundle, String modelId, boolean isPrimary, boolean isAuth) throws Exception {
         if (isPrimary) {
             pendingModelCallback = () -> {
-                processModelData(parsedBundle, modelId, true, true);
+                processModelData(parsedBundle, modelId, true, false);
             };
         } else {
             runPendingModelCallback();

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -37,6 +38,8 @@ class PartialModelRenderContractTest {
     @Test
     void acceleratedPathsAreSkippedForPartialModels() throws Exception {
         String source = source();
+        int gpuGatesSeen = 0;
+        int simdGatesSeen = 0;
         for (String line : source.split("\n")) {
             String trimmed = line.trim();
             boolean gpuGate = trimmed.startsWith("if (textureLocation != null")
@@ -44,11 +47,23 @@ class PartialModelRenderContractTest {
             boolean simdGate = trimmed.startsWith("if (NativeLibLoader.isLoaded()")
                     && trimmed.contains("isPreview");
             if (gpuGate || simdGate) {
+                if (gpuGate) {
+                    gpuGatesSeen++;
+                } else {
+                    simdGatesSeen++;
+                }
                 assertTrue(trimmed.contains("!partialModel"),
                         "an accelerated render path is reachable for a partial model, which drops "
                                 + "faces from the first-person arm: " + trimmed);
             }
         }
+        // Without this the loop body can stop matching - both gates are single long lines, and
+        // wrapping either one across lines would make the assertions above run zero times and
+        // the test pass while the regression it guards is live.
+        assertEquals(1, gpuGatesSeen, "did not find the GPU render gate to check; has it been "
+                + "reformatted across lines, or renamed? This test cannot pass vacuously.");
+        assertEquals(1, simdGatesSeen, "did not find the SIMD render gate to check; has it been "
+                + "reformatted across lines, or renamed? This test cannot pass vacuously.");
     }
 
     @Test

@@ -34,7 +34,7 @@ public class HandItemRenderer {
         // sets while renderLevel runs - and in 26.1.2 the hand is rendered outside it. Posing
         // with the world pose here put the body's arm across the camera, which read as an
         // arm with missing faces.
-        boolean previousFirstPerson = ModelPreviewRenderer.isFirstPerson();
+        boolean previousFirstPerson = ModelPreviewRenderer.isFirstPersonModeRaw();
         ModelPreviewRenderer.setFirstPersonMode(true);
         try {
             if (this.geoModel.processAnimationImpl(partialTick, true) == null
@@ -71,7 +71,7 @@ public class HandItemRenderer {
             float[] boneParams = model.getMatrixData() == null ? null : model.getMatrixData().clone();
             float[] absPivotData = model.getAbsPivotData() == null ? null : model.getAbsPivotData().clone();
             collector.submitCustomGeometry(poseStack, renderType, (pose, buffer) -> {
-                boolean outerFirstPerson = ModelPreviewRenderer.isFirstPerson();
+                boolean outerFirstPerson = ModelPreviewRenderer.isFirstPersonModeRaw();
                 boolean previousSubmittedDraw = RenderContext.isSubmittedDraw();
                 ModelPreviewRenderer.setFirstPersonMode(true);
                 RenderContext.beginSubmittedDraw();
