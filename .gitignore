@@ -111,6 +111,10 @@ gradle-app.setting
 
 # Dev run directories created by loom runClient/runServer with a custom --gameDir
 fabric/run-*/
+# Production Fabric instance assembled by tools/prod-instance.ps1 for third-party
+# mod acceptance: vanilla client jar, libraries and an assets junction - all fetched,
+# none of it source.
+fabric/prod-instance/
 
 # Acceptance tooling logs (tools/*.ps1)
 tools-logs/
