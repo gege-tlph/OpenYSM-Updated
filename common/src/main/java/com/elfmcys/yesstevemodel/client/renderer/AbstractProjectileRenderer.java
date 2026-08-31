@@ -44,14 +44,19 @@ public abstract class AbstractProjectileRenderer<TEntity extends Projectile, T e
     public void render(T animatable, S state, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         AnimationEvent<?> event = animatable.processAnimation(partialTick);
         Minecraft minecraft = Minecraft.getInstance();
-        if (event != null && minecraft.player != null) {
+        // getCurrentModel() is @Nullable (model assignment races async loading, see
+        // AnimatableEntity#getCurrentModel/#submitAsyncUpdate): SpotBugs NP_NULL_ON_SOME_PATH_
+        // FROM_RETURN_VALUE caught that every call below dereferenced it unguarded. Skip this
+        // frame the same way the method already skips when there is no animation event yet,
+        // rather than crash the render thread on the entity's first not-yet-loaded frame.
+        AnimatedGeoModel model = animatable.getCurrentModel();
+        if (event != null && minecraft.player != null && model != null) {
             Projectile projectile = animatable.getEntity();
             boolean isVisible = !projectile.isInvisibleTo(minecraft.player);
             boolean zShouldEntityAppearGlowing = minecraft.shouldEntityAppearGlowing(projectile);
-            RenderType renderType = getRenderType(animatable.getTextureLocation(), isVisible, zShouldEntityAppearGlowing, animatable.getCurrentModel().getGeoModel().isTranslucentTexture(0));
+            RenderType renderType = getRenderType(animatable.getTextureLocation(), isVisible, zShouldEntityAppearGlowing, model.getGeoModel().isTranslucentTexture(0));
             if (renderType != null && (isVisible || zShouldEntityAppearGlowing)) {
                 Color color = getRenderColor(animatable, partialTick, poseStack, bufferSource, null, packedLight);
-                AnimatedGeoModel model = animatable.getCurrentModel();
                 this.modelViewMatrix = new Matrix4f(poseStack.last().pose());
                 setCurrentModelRenderCycle(EModelRenderCycle.INITIAL);
                 poseStack.pushPose();

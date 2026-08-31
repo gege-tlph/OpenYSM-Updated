@@ -7,6 +7,7 @@ import net.minecraft.client.sounds.SoundBufferLibrary;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -21,8 +22,13 @@ public class YSMSoundInstance extends YSMTickableSoundInstance {
         this.streamFactory = streamFactory2;
     }
 
+    // `sound` is not a real contract of this method: nothing in the body reads it, and its one
+    // caller (YSMSoundInstanceFabricMixin#getAudioStream, adapting Fabric's
+    // FabricSoundInstance#getAudioStream(SoundBufferLibrary, Identifier, boolean) — which has no
+    // Sound to offer) always passes null. @NotNull here was misleading: SpotBugs correctly flagged
+    // the caller (NP_NONNULL_PARAM_VIOLATION) for a contract this method never actually needed.
     @NotNull
-    public CompletableFuture<AudioStream> getStream(@NotNull SoundBufferLibrary soundBufferLibrary, @NotNull Sound sound, boolean z) {
+    public CompletableFuture<AudioStream> getStream(@NotNull SoundBufferLibrary soundBufferLibrary, @Nullable Sound sound, boolean z) {
         CompletableFuture<AudioStream> completableFuture = new CompletableFuture<>();
         Minecraft.getInstance().execute(() -> {
             try {

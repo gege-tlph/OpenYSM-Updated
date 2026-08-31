@@ -121,3 +121,8 @@ tools-logs/
 
 # JUnit run artifacts from tests that touch the client audio decoder
 common/logs/
+
+# Same class of noise from :fabric:test. fabric/logs/latest.log was accidentally committed by
+# 69bf8e6 (a `git add -A` sweep during a G5 acceptance run); it is untracked below and the whole
+# directory ignored so it stops recurring.
+fabric/logs/

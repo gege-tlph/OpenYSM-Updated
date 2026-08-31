@@ -2,6 +2,9 @@ plugins {
     id 'dev.architectury.loom' version '1.17.487' apply false
     id 'architectury-plugin' version '3.5-SNAPSHOT'
     id 'com.gradleup.shadow' version '9.2.2' apply false
+    // Quality gate: bytecode static analysis, report-only (see the subprojects block below
+    // for why it does not fail the build yet). Mirrors the tlm-tsumugi sibling project's setup.
+    id 'com.github.spotbugs' version '6.5.10' apply false
 }
 
 architectury {
@@ -17,6 +20,7 @@ subprojects {
     apply plugin: 'dev.architectury.loom'
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
+    apply plugin: 'com.github.spotbugs'
 
     base {
         // Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
@@ -67,6 +71,15 @@ subprojects {
         mappings loom.layered {
             mappings file(rootProject.file('fabric/mappings/mapping.tiny'))
         }
+
+        // Architecture assertions that read **bytecode**, not source text. The port26 contract
+        // tests mostly scan source strings, which has already misfired twice (comment-stripping
+        // missed a javadoc; a button-literal match silently went to zero coverage after the
+        // literal became a constant). ArchUnit walks the actual call graph and field accesses,
+        // so it is not fooled by comments, formatting, or how a literal is spelled. Shared with
+        // :fabric via the `common/src/test/java` srcDir wired up in fabric/build.gradle, so it
+        // only needs declaring once here. Same version as the tlm-tsumugi sibling project.
+        testImplementation "com.tngtech.archunit:archunit:1.4.1"
     }
 
     java {
@@ -110,4 +123,32 @@ subprojects {
             // retrieving dependencies.
         }
     }
+
+    // ------------------------------------------------------------------------------------------
+    // Quality gate: SpotBugs (2026-08-31, ported alongside the ArchUnit rules above).
+    //
+    // Report-only, same as the tlm-tsumugi sibling project: it DOES run as part of `check`
+    // (the plugin wires spotbugsMain into it) but `ignoreFailures = true` keeps it from failing
+    // the build. This repo's gate ladder (TEST_GATES.md) does not call it out as a blocking
+    // gate either, for the same reason tlm-tsumugi withheld it: a brand-new static-analysis gate
+    // needs to be proven to actually go red on a real defect before it is trusted to block a
+    // build — see docs/porting/26.1.2/EVIDENCE.md for what this run found. Reports land in
+    // <module>/build/reports/spotbugs/main.html; nothing here reads them automatically.
+    // ------------------------------------------------------------------------------------------
+    spotbugs {
+        ignoreFailures = true
+        showStackTraces = false
+        reportLevel = com.github.spotbugs.snom.Confidence.valueOf('HIGH')
+        effort = com.github.spotbugs.snom.Effort.valueOf('MAX')
+    }
+
+    tasks.named('spotbugsMain') {
+        reports {
+            html { required = true }
+            xml { required = false }
+        }
+    }
+
+    // Test-only classes (JUnit contract tests, mock harnesses) are low value and noisy here.
+    tasks.matching { it.name == 'spotbugsTest' }.configureEach { enabled = false }
 }

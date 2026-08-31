@@ -133,7 +133,13 @@ public abstract class GeoReplacedEntityRenderer<TEntity extends Player, T extend
             }
         }
         Minecraft minecraft = Minecraft.getInstance();
-        if (event != null && minecraft.player != null) {
+        // getCurrentModel() is @Nullable (model assignment races async loading, see
+        // AnimatableEntity#getCurrentModel/#submitAsyncUpdate). renderWithBone/
+        // renderWithBoneAndRenderType dereference it unguarded (same shape SpotBugs caught in
+        // AbstractProjectileRenderer/GeoEntityRenderer, NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE) —
+        // skip this frame rather than crash the render thread on a not-yet-loaded model.
+        AnimatedGeoModel animatedGeoModel = t.getCurrentModel();
+        if (event != null && minecraft.player != null && animatedGeoModel != null) {
             EntityModelData modelData = event.getModelData();
             // 使用 .set 来避免每次渲染创建新的 Matrix4f, 减少 allocation rate
             this.dispatchedMat.set(poseStack.last().pose());
@@ -154,9 +160,8 @@ public abstract class GeoReplacedEntityRenderer<TEntity extends Player, T extend
             }
             preRenderCallback(entity, poseStack, partialTick);
             poseStack.translate(0.0f, 0.01f, 0.0f);
-            AnimatedGeoModel animatedGeoModel = t.getCurrentModel();
             int textureIndex = identifier == null ? t.getTextureIndex() : 0;
-            RenderType renderType = getRenderType(identifier == null ? t.getTextureLocation() : identifier, isBodyVisible(state) && !entity.isInvisibleTo(minecraft.player), minecraft.shouldEntityAppearGlowing(entity), t.getCurrentModel().getGeoModel().isTranslucentTexture(textureIndex));
+            RenderType renderType = getRenderType(identifier == null ? t.getTextureLocation() : identifier, isBodyVisible(state) && !entity.isInvisibleTo(minecraft.player), minecraft.shouldEntityAppearGlowing(entity), animatedGeoModel.getGeoModel().isTranslucentTexture(textureIndex));
             boolean useExtraPlayer = t.isRenderLayersFirst();
             Color color = getRenderColor(t, partialTick, poseStack, multiBufferSource, null, packedLight);
             renderWithBone(animatedGeoModel, t, partialTick, poseStack, multiBufferSource, null, packedLight, packOverlayCoords(entity, getHurtOverlayProgress(entity, partialTick)), color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, color.getAlpha() / 255.0f);

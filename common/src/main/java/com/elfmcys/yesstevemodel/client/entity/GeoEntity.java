@@ -84,14 +84,20 @@ public abstract class GeoEntity<T extends Entity> extends AnimatableEntity<T> {
     @Override
     public void setupAnim(float seekTime, boolean isFirstPerson) {
         super.setupAnim(seekTime, isFirstPerson);
-        if (this.boneLookup != null) {
+        // Snapshot into a local: processor.execute() only queues these closures (see
+        // AnimationProcessor#execute), it does not run them inline. Reading `this.boneLookup`
+        // from inside the closures instead of capturing it here left a window where a concurrent
+        // setBoneLookup(null) (model reload/unload) could pass this null check and still let a
+        // pending closure NPE later, since the check and the dereference were not the same read.
+        MolangWatchRegistry boneLookup = this.boneLookup;
+        if (boneLookup != null) {
             AnimationProcessor<T> processor = getEvaluationContext();
             processor.execute(evaluator -> {
-                this.boneLookup.evauatePreAnimation(evaluator);
+                boneLookup.evauatePreAnimation(evaluator);
                 return null;
             }, false, true, null);
             processor.execute(it -> {
-                this.boneLookup.evaluatePostAnimation(it);
+                boneLookup.evaluatePostAnimation(it);
                 return null;
             }, false, false, null);
         }

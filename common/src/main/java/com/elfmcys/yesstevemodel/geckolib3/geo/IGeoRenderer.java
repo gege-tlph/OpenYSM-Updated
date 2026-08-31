@@ -137,6 +137,12 @@ public interface IGeoRenderer<T extends AnimatableEntity<?>> {
         return null;
     }
 
+    // Every call site (AbstractProjectileRenderer, GeoEntityRenderer, GeoReplacedEntityRenderer)
+    // immediately dereferences the result (color.getRed()/getGreen()/...) with no null check;
+    // @NotNull documents that contract instead of leaving it implicit (SpotBugs NP_NULL_ON_SOME_PATH
+    // flagged the callers because a `default` method with no nullability annotation is fair game
+    // for a hypothetical null-returning override, even though none exists).
+    @NotNull
     default Color getRenderColor(T animatable, float partialTick, PoseStack poseStack, @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, int packedLight) {
         return Color.WHITE;
     }

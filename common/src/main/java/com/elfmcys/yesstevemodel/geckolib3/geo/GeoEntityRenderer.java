@@ -41,14 +41,19 @@ public abstract class GeoEntityRenderer<TEntity extends Entity, T extends Animat
     public void renderEntity(T t, EntityRenderState state, float f, float f2, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         AnimationEvent<?> event = t.processAnimation(f2);
         Minecraft minecraft = Minecraft.getInstance();
-        if (event != null && minecraft.player != null) {
+        // getCurrentModel() is @Nullable (model assignment races async loading, see
+        // AnimatableEntity#getCurrentModel/#submitAsyncUpdate): SpotBugs NP_NULL_ON_SOME_PATH_
+        // FROM_RETURN_VALUE caught that every call below dereferenced it unguarded. Skip this
+        // frame the same way the method already skips when there is no animation event yet,
+        // rather than crash the render thread on the entity's first not-yet-loaded frame.
+        AnimatedGeoModel model = t.getCurrentModel();
+        if (event != null && minecraft.player != null && model != null) {
             Entity entity = t.getEntity();
             boolean z = !entity.isInvisibleTo(minecraft.player);
             boolean zShouldEntityAppearGlowing = minecraft.shouldEntityAppearGlowing(entity);
-            RenderType renderType = getRenderType(t.getTextureLocation(), z, zShouldEntityAppearGlowing, t.getCurrentModel().getGeoModel().isTranslucentTexture(0));
+            RenderType renderType = getRenderType(t.getTextureLocation(), z, zShouldEntityAppearGlowing, model.getGeoModel().isTranslucentTexture(0));
             if (renderType != null && (z || zShouldEntityAppearGlowing)) {
                 Color color = getRenderColor(t, f2, poseStack, multiBufferSource, null, i);
-                AnimatedGeoModel model = t.getCurrentModel();
                 this.worldMatrix = new Matrix4f(poseStack.last().pose());
                 setCurrentModelRenderCycle(EModelRenderCycle.INITIAL);
                 poseStack.pushPose();
