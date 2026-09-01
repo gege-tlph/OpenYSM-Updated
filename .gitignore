@@ -126,3 +126,7 @@ common/logs/
 # 69bf8e6 (a `git add -A` sweep during a G5 acceptance run); it is untracked below and the whole
 # directory ignored so it stops recurring.
 fabric/logs/
+
+# 26.1.2 移植过程文档：内部工作日志/证据账本/验收截图，只作本机迁移记录使用，
+# 2026-09-01 应要求整体从远端仓库历史清除，此后不再提交。文件本身仍保留在本地磁盘上。
+docs/porting/26.1.2/
